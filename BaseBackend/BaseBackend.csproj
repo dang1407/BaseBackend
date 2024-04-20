@@ -13,10 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\Base\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\BaseBackend.Application\BaseBackend.Application.csproj" />
     <ProjectReference Include="..\BaseBackend.Domain\BaseBackend.Domain.csproj" />
     <ProjectReference Include="..\BaseBackend.Infrastructure\BaseBackend.Infrastructure.csproj" />
