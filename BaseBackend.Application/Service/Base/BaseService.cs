@@ -5,14 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using BaseBackend.Domain.Constant;
 
 namespace BaseBackend.Application
 {
-    public class BaseService<TEntity, TDTO, TCreateDTO, TUpdateDTO> : BaseReadOnlyService<TEntity, TDTO>, IBaseService<TDTO, TCreateDTO, TUpdateDTO> where TEntity : IEntity
+    public class BaseService<TEntity, TDTO, TCreateDTO, TUpdateDTO, TFilter> : BaseReadOnlyService<TEntity, TDTO, TFilter>, IBaseService<TDTO, TCreateDTO, TUpdateDTO, TFilter> where TEntity : BaseEntity, IEntity where TFilter : BaseFilter
     {
-        protected BaseService(IBaseRepository<TEntity> baseRepository, IMapper mapper) : base(baseRepository, mapper)
+        protected BaseService(IBaseRepository<TEntity, TFilter> baseRepository, IMapper mapper) : base(baseRepository, mapper)
         {
-
         }
 
 
@@ -76,7 +76,7 @@ namespace BaseBackend.Application
         /// <param name="entity">Instance của Entity</param>
         /// <returns>Thông tin của Entity sau khi đã thay đổi</returns>
         /// Created by: nkmdang (20/09/2023)
-        public async Task<TDTO> UpdateAsync( Guid id, TUpdateDTO updateDTO)
+        public async Task<TDTO> UpdateAsync(Guid id, TUpdateDTO updateDTO)
         {
             var entity = await BaseRepository.GetByIdAsync(id);
 
@@ -110,8 +110,11 @@ namespace BaseBackend.Application
         /// Created by: nkmdang (20/09/2023)
         public async Task<int> DeleteAsync(Guid id)
         {
-            await BaseRepository.GetByIdAsync(id);
-
+            TEntity? existItem = await BaseRepository.FindByIdAsync(id);
+            if (existItem == null) 
+            {
+                throw new NotFoundException(SharedResource.ItemNotFoundMessage);
+            }
             var result = await BaseRepository.DeleteAsync(id);  
             return result;
         }
@@ -193,10 +196,9 @@ namespace BaseBackend.Application
             return entity;
         }
 
-        
-
-
-        
-        
+        public Task<TDTO> UpdateManyAsync()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

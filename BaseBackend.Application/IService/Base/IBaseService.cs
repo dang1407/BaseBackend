@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Application
 {
-    public interface IBaseService<TDTO, TCreateDTO, TUpdateDTO> : IBaseReadOnlyService<TDTO>
+    public interface IBaseService<TDTO, TCreateDTO, TUpdateDTO, TFilter> : IBaseReadOnlyService<TDTO, TFilter> where TFilter : BaseFilter
     {
         /// <summary>
         /// Hàm thêm mới một TDTO
@@ -33,6 +33,8 @@ namespace BaseBackend.Application
         /// <returns>Thông tin của TDTO sau khi đã thay đổi</returns>
         /// Created by: nkmdang (20/09/2023)
         Task<TDTO> UpdateAsync(Guid id, TUpdateDTO updateDTO);
+
+        Task<TDTO> UpdateManyAsync();
 
         /// <summary>
         /// Hàm xóa thông tin một TDTO

@@ -3,17 +3,14 @@ using BaseBackend.Controllers.Base;
 using BaseBackend.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using BaseBackend.Application;
-using BaseBackend.Controllers.Base;
-using BaseBackend.Domain;
 
 namespace BaseBackend.Controllers
 {
 
-    public class BaseController<TDTO, TCreateDTO, TUpdateDTO> : BaseReadOnlyController<TDTO>
+    public class BaseController<TDTO, TCreateDTO, TUpdateDTO, TFilter> : BaseReadOnlyController<TDTO, TFilter> where TFilter : BaseFilter
     {
-        protected readonly IBaseService<TDTO, TCreateDTO, TUpdateDTO> BaseService;
-        public BaseController(IBaseService<TDTO, TCreateDTO, TUpdateDTO> baseService) : base(baseService)
+        protected readonly IBaseService<TDTO, TCreateDTO, TUpdateDTO, TFilter> BaseService;
+        public BaseController(IBaseService<TDTO, TCreateDTO, TUpdateDTO, TFilter> baseService) : base(baseService)
         {
             BaseService = baseService;
         }

@@ -8,28 +8,14 @@ using AutoMapper;
 
 namespace BaseBackend.Application
 {
-    public abstract class BaseReadOnlyService<TEntity, TDTO> : IBaseReadOnlyService<TDTO>
+    public abstract class BaseReadOnlyService<TEntity, TDTO, TFilter> : IBaseReadOnlyService<TDTO, TFilter> where TFilter : BaseFilter where TEntity : BaseEntity, IEntity
     {
-        protected readonly IBaseRepository<TEntity> BaseRepository;
+        protected readonly IBaseRepository<TEntity, TFilter> BaseRepository;
         protected readonly IMapper Mapper;
-        protected BaseReadOnlyService(IBaseRepository<TEntity> baseRepository, IMapper mapper)
+        protected BaseReadOnlyService(IBaseRepository<TEntity, TFilter> baseRepository, IMapper mapper)
         {
             BaseRepository = baseRepository;
             Mapper = mapper;
-        }
-
-
-
-        /// <summary>
-        /// Hàm lấy ra tất cả bản ghi
-        /// </summary>
-        /// <returns>Tất cả bản ghi</returns>
-        /// Created by: nkmdang (20/09/2023)
-        public virtual async Task<List<TDTO>> GetFilterAsync( int page, int pageSize, string? property)
-        {
-            var entities = await BaseRepository.GetFilterAsync( page - 1, pageSize, property);
-            var result = entities.Select(entity => MapEntityToDTO(entity)).ToList();
-            return result;
         }
 
 
@@ -59,6 +45,21 @@ namespace BaseBackend.Application
             return result;  
         }
 
+        public async Task<List<TDTO>> GetPaging(PagingInfo pagingInfo, TFilter filter)
+        {
+            if(pagingInfo.PageIndex < 1)
+            {
+                pagingInfo.PageIndex = 0;
+            }
+            else
+            {
+                pagingInfo.PageIndex = pagingInfo.PageIndex - 1;
+            }
+            List<TEntity> entities = await BaseRepository.GetPaging(pagingInfo, filter);
+            List<TDTO> result = entities.Select(e => Mapper.Map<TDTO>(e)).ToList();
+            return result;
+        }
+
 
         /// <summary>
         /// Hàm chuyển đổi từ Entity sang DTO
@@ -72,10 +73,6 @@ namespace BaseBackend.Application
             return dto; 
         }
 
-        public async Task<int> GetNumberRecordsAsync(string? searchProperty)
-        {
-            var result = await BaseRepository.GetNumberRecordsAsync(searchProperty);
-            return result;
-        }
+       
     }
 }

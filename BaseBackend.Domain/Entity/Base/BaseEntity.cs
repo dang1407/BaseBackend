@@ -12,27 +12,42 @@ namespace BaseBackend.Domain
     /// </summary>
     public abstract class BaseEntity
     {
+        public string? TableName { get; set; }
+        public string IdColumnName { get; set; }
+        public bool HasDeleted { get; set; }
+        public bool HasVersion { get; set; }
         /// <summary>
         /// Ngày tạo
         /// </summary>
+        [PropertyEntity("CreatedDate")]
         public DateTimeOffset? CreatedDate { get; set; }
 
 
         /// <summary>
         /// Người tạo
         /// </summary>
+        [PropertyEntity("CreatedBy")]
         public string? CreatedBy { get; set; }
 
 
         /// <summary>
         /// Ngày sửa
         /// </summary>
+        [PropertyEntity("ModifiedDate")]
         public DateTimeOffset? ModifiedDate { get; set; }
 
 
         /// <summary>
         /// Người sửa
         /// </summary>
+        [PropertyEntity("ModifiedBy")]
         public string? ModifiedBy { get; set; }
+        public BaseEntity(string tableName, string idColumnName, bool hasDeleted = true, bool hasVersion = true)
+        {
+            TableName = tableName;
+            IdColumnName = idColumnName;
+            HasDeleted = hasDeleted;
+            HasVersion = hasVersion;
+        }
     }
 }

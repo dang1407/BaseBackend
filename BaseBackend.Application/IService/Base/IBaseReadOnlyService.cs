@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BaseBackend.Domain;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Application
 {
-    public interface IBaseReadOnlyService<TDTO>
+    public interface IBaseReadOnlyService<TDTO, TFilter> where TFilter : BaseFilter
     {
         /// <summary>
         /// Hàm lấy ra tất cả bản ghi
         /// </summary>
         /// <returns>Tất cả bản ghi</returns>
         /// Created by: nkmdang (20/09/2023)
-        Task<List<TDTO>> GetFilterAsync(int page, int pageSize, string? property);
+        Task<List<TDTO>> GetPaging(PagingInfo pagingInfo, TFilter filter);
 
 
         /// <summary>
@@ -31,7 +32,5 @@ namespace BaseBackend.Application
         /// <returns>Thông tin Entity nếu thành công, null nếu thất bại</returns>
         /// Created by: nkmdang (20/09/2023)
         Task<TDTO> GetByIdAsync(Guid id);
-
-        Task<int> GetNumberRecordsAsync(string? searchProperty);
     }
 }
