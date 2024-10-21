@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 namespace BaseBackend.Controllers
 {
 
-    public class BaseController<TDTO, TCreateDTO, TUpdateDTO, TFilter> : BaseReadOnlyController<TDTO, TFilter> where TFilter : BaseFilter
+    public class BaseController<TDTO, TFilter, TIdKey> : BaseReadOnlyController<TDTO, TFilter, TIdKey> where TFilter : BaseFilter
     {
-        protected readonly IBaseService<TDTO, TCreateDTO, TUpdateDTO, TFilter> BaseService;
-        public BaseController(IBaseService<TDTO, TCreateDTO, TUpdateDTO, TFilter> baseService) : base(baseService)
+        protected readonly IBaseService<TDTO, TFilter, TIdKey> BaseService;
+        public BaseController(IBaseService<TDTO, TFilter, TIdKey> baseService) : base(baseService)
         {
             BaseService = baseService;
         }
@@ -24,7 +24,7 @@ namespace BaseBackend.Controllers
         [HttpPost]
         [Route("")]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        public async Task<IActionResult> InsertAsync([FromBody] TCreateDTO createDTO)
+        public async Task<IActionResult> InsertAsync([FromBody] TDTO createDTO)
         {
             if (!ModelState.IsValid)
             {
@@ -48,11 +48,19 @@ namespace BaseBackend.Controllers
                 // Trả về danh sách các trường thông tin bị lỗi cùng với thông báo lỗi
                 return BadRequest(new { errors = errorDetails });
             }
-
-            var result = await BaseService.InsertAsync(createDTO);
-            return StatusCode(201, result);
+            CachedUserInfo cachedUserInfo = Util.GetUserInforFromRequest(HttpContext);
+            dtoResponse.dto = await BaseService.InsertAsync(createDTO, cachedUserInfo);
+            return StatusCode(201, dtoResponse);
         }
 
+        [HttpPost]
+        [Route("many")]
+        public async Task<IActionResult> InsertManyAsync([FromBody] List<TDTO> createDTOs)
+        {
+            CachedUserInfo cachedUserInfo = Util.GetUserInforFromRequest(HttpContext);
+            var result = await BaseService.InsertManyAsync(createDTOs, cachedUserInfo);
+            return StatusCode(201, result);
+        }
 
         /// <summary>
         /// Hàm sửa thông tin một TDTO
@@ -62,10 +70,10 @@ namespace BaseBackend.Controllers
         /// Created by: nkmdang (20/09/2023)
         [HttpPut]
         [Route("{id}")]
-        public async Task<TDTO> UpdateAsync(Guid id, [FromBody] TUpdateDTO updateDTO)
+        public async Task<int> UpdateAsync(TIdKey id, [FromBody] TDTO updateDTO)
         {
-            var result = await BaseService.UpdateAsync(id, updateDTO);
-            return result;
+            CachedUserInfo cachedUserInfo = Util.GetUserInforFromRequest(HttpContext);
+            return await BaseService.UpdateAsync(id, updateDTO, cachedUserInfo);
         }
 
 
@@ -77,9 +85,10 @@ namespace BaseBackend.Controllers
         /// Created by: nkmdang (20/09/2023)
         [HttpDelete]
         [Route("{id}")]
-        public async Task<int> DeleteAsync(Guid id)
+        public async Task<int> DeleteAsync(TIdKey id)
         {
-            var result = await BaseService.DeleteAsync(id);
+            CachedUserInfo cachedUserInfo = Util.GetUserInforFromRequest(HttpContext);
+            var result = await BaseService.DeleteAsync(id, cachedUserInfo);
             return result;
         }
 
@@ -92,9 +101,10 @@ namespace BaseBackend.Controllers
         /// Created by: nkmdang (20/09/2023)
         [HttpDelete]
         [Route("")]
-        public async Task<IActionResult> DeleteManyAsync(List<Guid> ids)
+        public async Task<IActionResult> DeleteManyAsync(List<TIdKey> ids)
         {
-            var result = await BaseService.DeleteManyAsync(ids);
+            CachedUserInfo cachedUserInfo = Util.GetUserInforFromRequest(HttpContext);
+            var result = await BaseService.DeleteManyAsync(ids, cachedUserInfo);
             var response = new
             {
                 Success = $"Xóa thành công {result} bản ghi!",

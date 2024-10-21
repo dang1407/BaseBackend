@@ -6,13 +6,28 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using BaseBackend.Domain.Constant;
+using System.Net.Http;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.AspNetCore.Http;
 
 namespace BaseBackend.Application
 {
-    public class BaseService<TEntity, TDTO, TCreateDTO, TUpdateDTO, TFilter> : BaseReadOnlyService<TEntity, TDTO, TFilter>, IBaseService<TDTO, TCreateDTO, TUpdateDTO, TFilter> where TEntity : BaseEntity, IEntity where TFilter : BaseFilter
+    public class BaseService<TEntity, TDTO, TFilter, TIdKey> : BaseReadOnlyService<TEntity, TDTO, TFilter, TIdKey>, IBaseService<TDTO, TFilter, TIdKey> where TEntity : BaseEntity, IEntity<TIdKey> where TFilter : BaseFilter where TIdKey : struct
     {
-        protected BaseService(IBaseRepository<TEntity, TFilter> baseRepository, IMapper mapper) : base(baseRepository, mapper)
+        private readonly Type _type = typeof(TEntity);
+        private BaseEntity _entity;
+        private readonly IMemoryCache _memoryCache;
+        protected BaseService(IBaseRepository<TEntity, TFilter, TIdKey> baseRepository, IMapper mapper, IMemoryCache memoryCache) : base(baseRepository, mapper)
         {
+            _memoryCache = memoryCache;
+            if (Activator.CreateInstance(_type) is BaseEntity entity)
+            {
+                _entity = entity;
+            }
+            else
+            {
+                throw new InvalidException("Entity không phải BaseEntity");
+            }
         }
 
 
@@ -22,21 +37,21 @@ namespace BaseBackend.Application
         /// <param name="entity">Instance của Entity</param>
         /// <returns>Thông tin Entity đã thêm thành công</returns>
         /// Created by: nkmdang (20/09/2023)
-        public async Task<TDTO> InsertAsync(TCreateDTO createDTO)
+        public async Task<TDTO> InsertAsync(TDTO createDTO, CachedUserInfo cachedUserInfo)
         {
             var entity = MapCreateDTOToEntity(createDTO);
-            if(entity.GetId() == Guid.Empty)
-            {
-                entity.SetId(Guid.NewGuid());   
-            }
+            //if(entity.GetId() == Guid.Empty)
+            //{
+            //    entity.SetId(Guid.NewGuid());   
+            //}
 
             // Map các trường của Base Enity
             if(entity is BaseEntity baseEntity)
             {
                 baseEntity.CreatedDate ??= DateTime.Now;
-                baseEntity.CreatedBy ??= "NKMDANG";
+                baseEntity.CreatedBy ??= cachedUserInfo.AccountId;
                 baseEntity.ModifiedDate ??= DateTime.Now;
-                baseEntity.ModifiedBy ??= "NKMDANG";
+                baseEntity.ModifiedBy ??= cachedUserInfo.AccountId;
             }
 
             await ValidateCreateBusinessAsync(entity);
@@ -53,12 +68,18 @@ namespace BaseBackend.Application
         /// <param name="entities">Instances của Entity</param>
         /// <returns>Thông tin các Entity đã thêm thành công</returns>
         /// Created by: nkmdang (20/09/2023)
-        public async Task<List<TDTO>> InsertManyAsync(List<TCreateDTO> createDTOs)
+        public async Task<int> InsertManyAsync(List<TDTO> createDTOs, CachedUserInfo cachedUserInfo)
         {
             // Chuyển đổi CreateDTOs thành các Entity
             var listEntities = createDTOs.Select(createDTO => MapCreateDTOToEntity(createDTO)).ToList();
+            listEntities.ForEach(e => {
+                //e.SetId(Guid.NewGuid());
+                e.CreatedDate = DateTime.Now;
+                
+                }); 
             // Lọc ra các Id
             var listIds = listEntities.Select(entity => entity.GetId()).ToList();
+
             //Tìm các Entity đã tồn tại
             var existEntities = await BaseRepository.GetByListIdAsync(listIds);
             // Lọc ra Id của các Entity đã tồn tại
@@ -67,7 +88,7 @@ namespace BaseBackend.Application
             var newEntitiesToCreate = listEntities.Where(entity => !existEntitiesId.Contains(entity.GetId())).ToList();
             var listResultEntities = await BaseRepository.InsertManyAsync(newEntitiesToCreate);
             var results = listResultEntities.Select(entity =>  MapEntityToDTO(entity)).ToList(); 
-            return results;
+            return results.Count;
         }
 
         /// <summary>
@@ -76,7 +97,7 @@ namespace BaseBackend.Application
         /// <param name="entity">Instance của Entity</param>
         /// <returns>Thông tin của Entity sau khi đã thay đổi</returns>
         /// Created by: nkmdang (20/09/2023)
-        public async Task<TDTO> UpdateAsync(Guid id, TUpdateDTO updateDTO)
+        public async Task<int> UpdateAsync(TIdKey id, TDTO updateDTO, CachedUserInfo cachedUserInfo)
         {
             var entity = await BaseRepository.GetByIdAsync(id);
 
@@ -85,20 +106,24 @@ namespace BaseBackend.Application
             if (entity is BaseEntity baseEntity)
             {
                 baseEntity.ModifiedDate ??= DateTime.Now;
-                baseEntity.ModifiedBy ??= "NKMDANG";
+                baseEntity.ModifiedBy ??= cachedUserInfo.AccountId;
             }
             var newEntity = MapUpdateDTOToEntity(updateDTO, entity);
-            Console.WriteLine(entity.GetId());
-            Console.WriteLine(newEntity.GetId());
-            if (newEntity.GetId() == Guid.Empty)
-            {
-                newEntity.SetId(id);
-            }
+            //if (newEntity.GetId<Guid>() == Guid.Empty)
+            //{
+            //    newEntity.SetId(id);
+            //}
             await ValidateUpdateBusinessAsync(newEntity);
 
             await BaseRepository.UpdateAsync(newEntity);
             var result = MapEntityToDTO(newEntity);
             
+            return 1;
+        }
+
+        public Task<int> UpdateManyAsync(List<TDTO> entities, CachedUserInfo cachedUserInfo)
+        {
+            var result = BaseRepository.UpdateManyAsync(entities.Select(e => Mapper.Map<TEntity>(e)).ToList());
             return result;
         }
 
@@ -108,14 +133,20 @@ namespace BaseBackend.Application
         /// <param name="id">Định danh Entity</param>
         /// <returns>Số bản ghi đã xóa</returns>
         /// Created by: nkmdang (20/09/2023)
-        public async Task<int> DeleteAsync(Guid id)
+        public async Task<int> DeleteAsync(TIdKey id, CachedUserInfo cachedUserInfo)
         {
             TEntity? existItem = await BaseRepository.FindByIdAsync(id);
             if (existItem == null) 
             {
                 throw new NotFoundException(SharedResource.ItemNotFoundMessage);
             }
-            var result = await BaseRepository.DeleteAsync(id);  
+            int result;
+            if (_entity.HasDeleted)
+            {
+                result = await BaseRepository.SoftDeleteAsync(id);
+                return result;
+            }
+            result = await BaseRepository.DeleteAsync(id);  
             return result;
         }
 
@@ -125,11 +156,16 @@ namespace BaseBackend.Application
         /// <param name="ids">Danh sách các dịnh danh Entity</param>
         /// <returns>Số bản ghi đã xóa</returns>
         /// Created by: nkmdang (20/09/2023)
-        public async Task<int> DeleteManyAsync(List<Guid> ids)
+        public async Task<int> DeleteManyAsync(List<TIdKey> ids, CachedUserInfo cachedUserInfo)
         {
-            var entities = await BaseRepository.GetByListIdAsync(ids);  
-
-            var result = await BaseRepository.DeleteManyAsync(entities);    
+            var entities = await BaseRepository.GetByListIdAsync(ids);
+            int result;
+            if (_entity.HasDeleted)
+            {
+                result = await BaseRepository.SoftDeleteManyAsync(ids);
+                return result;
+            }
+            result = await BaseRepository.DeleteManyAsync(ids);
             return result;
         }
 
@@ -168,13 +204,13 @@ namespace BaseBackend.Application
         /// <param name="createDTO">Instance của TCreateDTO</param>
         /// <returns>Entity</returns>
         /// Created by: nkmdang (19/09/2023)
-        protected TEntity MapCreateDTOToEntity(TCreateDTO createDTO)
+        protected TEntity MapCreateDTOToEntity(TDTO createDTO)
         {
             var entity = Mapper.Map<TEntity>(createDTO);
-            if(entity.GetId() == Guid.Empty)
-            {
-                entity.SetId(Guid.NewGuid());   
-            }
+            //if(entity.GetId() == Guid.Empty)
+            //{
+            //    entity.SetId(Guid.NewGuid());   
+            //}
             return entity;
         }
 
@@ -184,7 +220,7 @@ namespace BaseBackend.Application
         /// <param name="updateDTO">Instance của TUpdateDTO</param>
         /// <returns>Entity</returns>
         /// Created by: nkmdang (19/09/2023)
-        protected TEntity MapUpdateDTOToEntity(TUpdateDTO updateDTO, TEntity entity)
+        protected TEntity MapUpdateDTOToEntity(TDTO updateDTO, TEntity entity)
         {
             var resultEntity = Mapper.Map(updateDTO, entity);
             return resultEntity;
@@ -196,9 +232,6 @@ namespace BaseBackend.Application
             return entity;
         }
 
-        public Task<TDTO> UpdateManyAsync()
-        {
-            throw new NotImplementedException();
-        }
+        
     }
 }

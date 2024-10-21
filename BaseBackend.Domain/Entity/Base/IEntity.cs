@@ -10,20 +10,20 @@ namespace BaseBackend.Domain
     /// <summary>
     /// Interface đại diện cho tất cả các Entity
     /// </summary>
-    public interface IEntity
+    public interface IEntity<T>
     {
         /// <summary>
         /// Hàm lấy ra Id của Entity
         /// </summary>
         /// <returns>Id của Entity (Guid)</returns>
         /// Created by: nkmdang (19/09/2023)
-        public Guid GetId();
+        public T GetId();
 
         /// <summary>
         /// Hàm gán giá trị cho Id của Entity
         /// </summary>
         /// <param name="id">Id cần gán cho Entity (Guid)</param>
         /// Created by: nkmdang (19/09/2023)
-        public void SetId(Guid id);
+        public void SetId(T id);
     }
 }

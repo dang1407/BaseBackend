@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Domain
 {
-    public class EmployeeFilter : BaseFilter
+    public class AccountFilter : BaseFilter
     {
-        public string? EmployeeCode { get; set; }
-        public string? FullName { get; set; }
-        public string? TitleName {  get; set; }
         public Guid AccountId { get; set; }
+        public string UserName { get; set; } = string.Empty;
     }
 }

@@ -7,12 +7,8 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Domain
 {
-    public class NotFoundException : Exception
+    public class NotFoundException : BaseException
     {
-        public int ErrorCode { get; set; }
-        public string DevMessage { get; set; }
-
-        public string UserMessage { get; set; }
         public NotFoundException() { }
 
         public NotFoundException(int errorCode)

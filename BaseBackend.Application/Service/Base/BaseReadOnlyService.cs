@@ -8,11 +8,11 @@ using AutoMapper;
 
 namespace BaseBackend.Application
 {
-    public abstract class BaseReadOnlyService<TEntity, TDTO, TFilter> : IBaseReadOnlyService<TDTO, TFilter> where TFilter : BaseFilter where TEntity : BaseEntity, IEntity
+    public abstract class BaseReadOnlyService<TEntity, TDTO, TFilter, TIdKey> : IBaseReadOnlyService<TDTO, TFilter, TIdKey> where TFilter : BaseFilter where TEntity : BaseEntity, IEntity<TIdKey>
     {
-        protected readonly IBaseRepository<TEntity, TFilter> BaseRepository;
+        protected readonly IBaseRepository<TEntity, TFilter, TIdKey> BaseRepository;
         protected readonly IMapper Mapper;
-        protected BaseReadOnlyService(IBaseRepository<TEntity, TFilter> baseRepository, IMapper mapper)
+        protected BaseReadOnlyService(IBaseRepository<TEntity, TFilter, TIdKey> baseRepository, IMapper mapper)
         {
             BaseRepository = baseRepository;
             Mapper = mapper;
@@ -25,7 +25,7 @@ namespace BaseBackend.Application
         /// <param name="id">Định danh của Entity (Guid)</param>
         /// <returns>Thông tin Entity nếu thành công, null nếu thất bại</returns>
         /// Created by: nkmdang (20/09/2023)
-        public virtual async Task<TDTO> FindByIdAsync(Guid id)
+        public virtual async Task<TDTO> FindByIdAsync(TIdKey id)
         {
             var entity = await BaseRepository.FindByIdAsync(id);
             var result = MapEntityToDTO(entity);
@@ -38,7 +38,7 @@ namespace BaseBackend.Application
         /// <param name="id">Định danh của Entity (Guid)</param>
         /// <returns>Thông tin Entity nếu thành công, null nếu thất bại</returns>
         /// Created by: nkmdang (20/09/2023)
-        public virtual async Task<TDTO> GetByIdAsync(Guid id)
+        public virtual async Task<TDTO> GetByIdAsync(TIdKey id)
         {
             var entity = await BaseRepository.GetByIdAsync(id); 
             var result = MapEntityToDTO(entity);    

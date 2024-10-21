@@ -1,15 +1,16 @@
 ﻿using BaseBackend.Application;
 using BaseBackend.Application.IService;
-using BaseBackend.Domain;
 using BaseBackend.Domain.Filter;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BaseBackend.Controllers
 {
-    public class EmployeesController : BaseController<EmployeeDTO, EmployeeFilter, Guid>
+    [Authorize]
+    public class TitleController : BaseController<TitleDTO, TitleFilter, Guid>
     {
-        public EmployeesController(IEmployeeService employeeService) : base(employeeService)
+        public TitleController(ITitleService baseService) : base(baseService)
         {
         }
     }

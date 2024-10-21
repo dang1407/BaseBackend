@@ -7,13 +7,8 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Domain
 {
-    public class ConflictException : Exception
+    public class ConflictException : BaseException
     {
-        public int ErrorCode { get; set; }
-
-        public string DevMessage { get; set; }
-
-        public string UserMessage { get; set; }
 
         public ConflictException() { }
 

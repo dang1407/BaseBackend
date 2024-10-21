@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Domain
 {
-    public class Employee : BaseEntity, IEntity
+    public class Employee : BaseEntity, IEntity<Guid>
     {
         [PropertyEntity("EmployeeId")]
         public Guid EmployeeId { get; set; }
@@ -44,10 +44,9 @@ namespace BaseBackend.Domain
         public string? Email { get; set; }
         [PropertyEntity("AvatarLink")]
         public string? AvatarLink { get; set; }
-        [PropertyEntity("DepartmentId")]
-        public Guid DepartmentId { get; set; }
 
         #region Extend Members
+        public Guid DepartmentId { get; set; }
         public string? TitleName { get; set; }
         public string? DepartmentName { get; set; }
         public string? CompanyAddress { get; set; }

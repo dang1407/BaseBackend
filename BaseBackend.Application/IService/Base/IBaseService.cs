@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Application
 {
-    public interface IBaseService<TDTO, TCreateDTO, TUpdateDTO, TFilter> : IBaseReadOnlyService<TDTO, TFilter> where TFilter : BaseFilter
+    public interface IBaseService<TDTO,TFilter, TIdKey> : IBaseReadOnlyService<TDTO, TFilter, TIdKey> where TFilter : BaseFilter
     {
         /// <summary>
         /// Hàm thêm mới một TDTO
@@ -15,7 +15,7 @@ namespace BaseBackend.Application
         /// <param name="createDTO">Instance của TDTO</param>
         /// <returns>Thông tin TDTO đã thêm thành công</returns>
         /// Created by: nkmdang (20/09/2023)
-        Task<TDTO> InsertAsync(TCreateDTO createDTO);
+        Task<TDTO> InsertAsync(TDTO createDTO, CachedUserInfo cachedUserInfo);
 
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace BaseBackend.Application
         /// <param name="createDTOs">Instances của TDTO</param>
         /// <returns>Thông tin các TDTO đã thêm thành công</returns>
         /// Created by: nkmdang (20/09/2023)
-        Task<List<TDTO>> InsertManyAsync(List<TCreateDTO> createDTOs);
+        Task<int> InsertManyAsync(List<TDTO> createDTOs, CachedUserInfo cachedUserInfo);
 
         /// <summary>
         /// Hàm sửa thông tin một TDTO
@@ -32,9 +32,9 @@ namespace BaseBackend.Application
         /// <param name="updateDTO">Instance của TDTO</param>
         /// <returns>Thông tin của TDTO sau khi đã thay đổi</returns>
         /// Created by: nkmdang (20/09/2023)
-        Task<TDTO> UpdateAsync(Guid id, TUpdateDTO updateDTO);
+        Task<int> UpdateAsync(TIdKey id, TDTO updateDTO, CachedUserInfo cachedUserInfo);
 
-        Task<TDTO> UpdateManyAsync();
+        Task<int> UpdateManyAsync(List<TDTO> entities, CachedUserInfo cachedUserInfo);
 
         /// <summary>
         /// Hàm xóa thông tin một TDTO
@@ -42,7 +42,7 @@ namespace BaseBackend.Application
         /// <param name="id">Định danh TDTO</param>
         /// <returns>Số bản ghi đã xóa</returns>
         /// Created by: nkmdang (20/09/2023)
-        Task<int> DeleteAsync(Guid id);
+        Task<int> DeleteAsync(TIdKey id, CachedUserInfo cachedUserInfo);
 
         /// <summary>
         /// Hàm xóa thông tin nhiều TDTO
@@ -50,6 +50,6 @@ namespace BaseBackend.Application
         /// <param name="ids">Danh sách các dịnh danh TDTO</param>
         /// <returns>Số bản ghi đã xóa</returns>
         /// Created by: nkmdang (20/09/2023)
-        Task<int> DeleteManyAsync(List<Guid> ids);
+        Task<int> DeleteManyAsync(List<TIdKey> ids, CachedUserInfo cachedUserInfo);
     }
 }

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Infrastructure
 {
-    public class EmployeeRepository : BaseRepository<Employee, EmployeeFilter>, IEmployeeRepository
+    public class EmployeeRepository : BaseRepository<Employee, EmployeeFilter, Guid>, IEmployeeRepository
     {
         public EmployeeRepository(IUnitOfWork unitOfWork) : base(unitOfWork) 
         { }
@@ -24,10 +24,15 @@ namespace BaseBackend.Infrastructure
                 FROM EMPLOYEE E
                 WHERE E.DELETED = {SharedResource.IsNotDelete}
             ";
+            if(!string.IsNullOrWhiteSpace(filter.EmployeeCode))
+            {
+                sql += " \n AND E.EmployeeCode = @EmployeeCode ";
+            }
 
-            sql += $@"LIMIT {pagingInfo.PageSize} OFFSET {pagingInfo.PageIndex * pagingInfo.PageSize};";
+            sql += $@" LIMIT {pagingInfo.PageSize} OFFSET {pagingInfo.PageIndex * pagingInfo.PageSize};";
             var param = new DynamicParameters();
-            var result = await Uow.Connection.QueryAsync<Employee>(sql);
+            param.Add("@EmployeeCode", filter.EmployeeCode);
+            var result = await Uow.Connection.QueryAsync<Employee>(sql, param);
             return result.ToList();
         }
     }

@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BaseBackend.Domain
+namespace BaseBackend.Application
 {
-    public interface IEmployeeRepository : IBaseRepository<Employee, EmployeeFilter>
+    public interface ITitleService : IBaseService<TitleDTO, TitleFilter, Guid>
     {
     }
 }

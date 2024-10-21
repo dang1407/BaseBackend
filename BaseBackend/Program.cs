@@ -10,6 +10,7 @@ using System.Text;
 using BaseBackend.Domain;
 using Microsoft.OpenApi.Models;
 using BaseBackend.Application.IService;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace BaseBackend
 {
@@ -41,6 +42,12 @@ namespace BaseBackend
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
             builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+            builder.Services.AddScoped<ITitleRepository, TitleRepository>();
+            builder.Services.AddScoped<ITitleService, TitleService>();
+            builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+            builder.Services.AddScoped<IAccountService, AccountService>();
+            builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             // AutoMapper
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             // Gán connectionString
@@ -48,7 +55,7 @@ namespace BaseBackend
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Swagger  Solution", Version = "v1" });
-                
+
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n
@@ -141,15 +148,17 @@ namespace BaseBackend
 
             builder.Services.AddAuthorization();
 
+            // Cache In-Memory
+            builder.Services.AddMemoryCache();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            //if (app.Environment.IsDevelopment())
-            //{
-            //    app.UseSwagger();
-            //    app.UseSwaggerUI();
-            //    app.UseCors("corsapp");
-            //}
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+                app.UseCors("corsapp");
+            }
 
             app.UseSwagger();
             app.UseSwaggerUI();
@@ -163,6 +172,7 @@ namespace BaseBackend
             app.MapControllers();
 
             app.UseMiddleware<ExceptionMiddleware>();
+            app.UseMiddleware<UserCacheMiddleware>();
 
             app.Run();
         }

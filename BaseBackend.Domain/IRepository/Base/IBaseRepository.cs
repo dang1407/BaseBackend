@@ -6,19 +6,19 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Domain
 {
-    public interface IBaseRepository<TEntity, TFilter> where TFilter : BaseFilter where TEntity : BaseEntity, IEntity
+    public interface IBaseRepository<TEntity, TFilter, TIdKey> where TFilter : BaseFilter where TEntity : BaseEntity, IEntity<TIdKey>
     {
 
         Task<List<TEntity>> GetPaging(PagingInfo pagingInfo, TFilter filter);
 
-        Task<TEntity?> FindByIdAsync(Guid id);
+        Task<TEntity?> FindByIdAsync(TIdKey id) ;
         /// <summary>
         /// Hàm lấy thông tin Entity theo Id
         /// </summary>
         /// <param name="id">Định danh của Entity (Guid)</param>
         /// <returns>Thông tin Entity nếu thành công, null nếu thất bại</returns>
         /// Created by: nkmdang (19/09/2023)
-        Task<TEntity> GetByIdAsync(Guid id);
+        Task<TEntity> GetByIdAsync(TIdKey id) ;
 
         /// <summary>
         /// Hàm lấy thông tin nhiều Entity theo Id
@@ -26,7 +26,7 @@ namespace BaseBackend.Domain
         /// <param name="ids">Định danh của các Entity (Guid)</param>
         /// <returns>Thông tin các Entity nếu thành công, null nếu thất bại</returns>
         /// Created by: nkmdang (20/09/2023)
-        Task<List<TEntity>> GetByListIdAsync(List<Guid> ids);   
+        Task<List<TEntity>> GetByListIdAsync(List<TIdKey> ids);   
 
         /// <summary>
         /// Hàm thêm mới một Entity
@@ -52,6 +52,7 @@ namespace BaseBackend.Domain
         /// <returns>Thông tin của Entity sau khi đã thay đổi</returns>
         /// Created by: nkmdang (20/09/2023)
         abstract Task<TEntity> UpdateAsync(TEntity entity);
+        abstract Task<int> UpdateManyAsync(List<TEntity> entities);
 
         /// <summary>
         /// Hàm cập nhật Deleted = 1 thông tin một Entity
@@ -59,7 +60,7 @@ namespace BaseBackend.Domain
         /// <param name="id">Định danh Entity</param>
         /// <returns>Số bản ghi đã xóa</returns>
         /// Created by: nkmdang (20/09/2023)
-        Task<int> SoftDeleteAsync(Guid id);
+        Task<int> SoftDeleteAsync(TIdKey id) ;
 
         /// <summary>
         /// Hàm cập nhật Deleted = 1 thông tin một Entity
@@ -67,7 +68,7 @@ namespace BaseBackend.Domain
         /// <param name="id">Định danh Entity</param>
         /// <returns>Số bản ghi đã xóa</returns>
         /// Created by: nkmdang (20/09/2023)
-        Task<int> SoftDeleteManyAsync(List<Guid> ids);
+        Task<int> SoftDeleteManyAsync(List<TIdKey> ids);
 
         /// <summary>
         /// Hàm xóa thông tin một Entity
@@ -75,7 +76,7 @@ namespace BaseBackend.Domain
         /// <param name="id">Định danh Entity</param>
         /// <returns>Số bản ghi đã xóa</returns>
         /// Created by: nkmdang (20/09/2023)
-        Task<int> DeleteAsync(Guid id);
+        Task<int> DeleteAsync(TIdKey id) ;
 
         /// <summary>
         /// Hàm xóa thông tin nhiều Entity
@@ -83,6 +84,6 @@ namespace BaseBackend.Domain
         /// <param name="ids">Danh sách các dịnh danh Entity</param>
         /// <returns>Số bản ghi đã xóa</returns>
         /// Created by: nkmdang (20/09/2023)
-        Task<int> DeleteManyAsync(List<TEntity> entities);
+        Task<int> DeleteManyAsync(List<TIdKey> ids) ;
     }
 }

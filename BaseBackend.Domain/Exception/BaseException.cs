@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Domain
 {
-    public class BaseException
+    public class BaseException : Exception
     {
         #region Properties
         public int ErrorCode { get; set; }  

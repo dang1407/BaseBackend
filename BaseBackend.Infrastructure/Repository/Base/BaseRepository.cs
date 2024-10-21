@@ -9,13 +9,26 @@ using BaseBackend.Domain.Constant;
 
 namespace BaseBackend.Infrastructure
 {
-    public abstract class BaseRepository<TEntity, TFilter> : IBaseRepository<TEntity, TFilter> where TEntity : BaseEntity, IEntity where TFilter : BaseFilter
+    public abstract class BaseRepository<TEntity, TFilter, TIdKey> : IBaseRepository<TEntity, TFilter, TIdKey> where TEntity : BaseEntity, IEntity<TIdKey> where TFilter : BaseFilter
     {
         private readonly Type _type = typeof(TEntity);
+        private BaseEntity _entity;
+        private List<PropertyInfo> _propertyInfo = typeof(TEntity).GetProperties()
+                .Where(p => p.GetCustomAttributes(typeof(PropertyEntity), false)
+                .Cast<PropertyEntity>()
+                .Any(a => a.IsColumn)).ToList();
         protected readonly IUnitOfWork Uow;
         public BaseRepository(IUnitOfWork uow)
         {
             Uow = uow;
+            if (Activator.CreateInstance(_type) is BaseEntity entity)
+            {
+                _entity = entity;
+            }
+            else
+            {
+                throw new InvalidException("Entity không phải BaseEntity");
+            }
         }
 
 
@@ -25,29 +38,22 @@ namespace BaseBackend.Infrastructure
         /// <param name="id">Định danh của Entity (Guid)</param>
         /// <returns>Thông tin Entity nếu thành công, null nếu thất bại</returns>
         /// Created by: nkmdang (19/09/2023)
-        public async Task<TEntity?> FindByIdAsync(Guid id)
+        public async Task<TEntity?> FindByIdAsync(TIdKey id)
         {
-            // Kiểm tra xem TEntity có kế thừa từ BaseEntity không
-            if (Activator.CreateInstance(_type) is BaseEntity baseEntity)
-            {
-                // Lấy ra TableName và IdColumnName từ BaseEntity
-                var tableName = baseEntity.TableName;
-                var idColumnName = baseEntity.IdColumnName;
+            // Lấy ra TableName và IdColumnName từ BaseEntity
+            var tableName = _entity.TableName;
+            var idColumnName = _entity.IdColumnName;
 
-                // Tạo câu truy vấn
-                var sql = $"SELECT * FROM {tableName} WHERE {idColumnName} = @ID";
+            // Tạo câu truy vấn
+            var sql = $"SELECT * FROM {tableName} WHERE {idColumnName} = @ID";
 
-                // Tạo param
-                var param = new DynamicParameters();
-                param.Add("ID", id);
+            // Tạo param
+            var param = new DynamicParameters();
+            param.Add("ID", id);
 
-                // Thực hiện truy vấn
-                var result = await Uow.Connection.QueryFirstOrDefaultAsync<TEntity>(sql, param);
-                return result;
-            }
-
-            // Nếu TEntity không kế thừa từ BaseEntity thì trả về null
-            return null;
+            // Thực hiện truy vấn
+            var result = await Uow.Connection.QueryFirstOrDefaultAsync<TEntity>(sql, param);
+            return result;
         }
 
         /// <summary>
@@ -72,7 +78,7 @@ namespace BaseBackend.Infrastructure
         /// <param name="id">Định danh của Entity (Guid)</param>
         /// <returns>Thông tin Entity nếu thành công, null nếu thất bại</returns>
         /// Created by: nkmdang (19/09/2023)
-        public virtual async Task<TEntity> GetByIdAsync(Guid id)
+        public virtual async Task<TEntity> GetByIdAsync(TIdKey id)
         {
             var entity = await FindByIdAsync(id);
             if (entity != null)
@@ -89,32 +95,23 @@ namespace BaseBackend.Infrastructure
         /// <param name="ids">Định danh của các Entity (Guid)</param>
         /// <returns>Thông tin các Entity nếu thành công, null nếu thất bại</returns>
         /// Created by: nkmdang (20/09/2023)
-        public async Task<List<TEntity>> GetByListIdAsync(List<Guid> ids)
+        public async Task<List<TEntity>> GetByListIdAsync(List<TIdKey> ids) 
         {
-            // Lấy ra kiểu của TEntity
-            var type = typeof(TEntity);
 
-            // Kiểm tra xem TEntity có kế thừa từ BaseEntity không
-            if (Activator.CreateInstance(type) is BaseEntity baseEntity)
-            {
-                // Lấy ra TableName và IdColumnName từ BaseEntity
-                var tableName = baseEntity.TableName;
-                var idColumnName = baseEntity.IdColumnName;
+            // Lấy ra TableName và IdColumnName từ BaseEntity
+            var tableName = _entity.TableName;
+            var idColumnName = _entity.IdColumnName;
 
-                // Tạo câu truy vấn
-                var sql = $"SELECT * FROM {tableName} WHERE {idColumnName} IN @ID";
+            // Tạo câu truy vấn
+            var sql = $"SELECT * FROM {tableName} WHERE {idColumnName} IN @ID";
 
-                // Tạo param
-                var param = new DynamicParameters();
-                param.Add("ID", ids);
+            // Tạo param
+            var param = new DynamicParameters();
+            param.Add("ID", ids);
 
-                // Thực hiện truy vấn
-                var result = await Uow.Connection.QueryAsync<TEntity>(sql, param);
-                return result.ToList();
-            }
-
-            // Nếu TEntity không kế thừa từ BaseEntity thì trả về null
-            return [];
+            // Thực hiện truy vấn
+            var result = await Uow.Connection.QueryAsync<TEntity>(sql, param);
+            return result.ToList();
         }
 
         /// <summary>
@@ -125,23 +122,17 @@ namespace BaseBackend.Infrastructure
         /// Created by: nkmdang (20/09/2023)
         public virtual async Task<TEntity> InsertAsync(TEntity entity)
         {
-            Type type = typeof(TEntity);
             var tableName = (entity as BaseEntity)?.TableName;
 
-            var properties = type.GetProperties()
-                .Where(p => p.GetCustomAttributes(typeof(PropertyEntity), false)
-                .Cast<PropertyEntity>()
-                .Any(a => a.IsColumn));
-
-            var columns = properties.Select(p => p.GetCustomAttribute<PropertyEntity>()?.ColumnName).ToList();
-            var values = properties.Select(p => $"@{p.Name}").ToList();
+            var columns = _propertyInfo.Select(p => p.GetCustomAttribute<PropertyEntity>()?.ColumnName).ToList();
+            var values = _propertyInfo.Select(p => $"@{p.Name}").ToList();
 
             string columnString = string.Join(", ", columns);
             string valueString = string.Join(", ", values);
 
-            string sql = $"INSERT INTO {tableName} ({columnString}) VALUES ({valueString});";
+            string sql = $"INSERT INTO {_entity.TableName} ({columnString}) VALUES ({valueString});";
             var param = new DynamicParameters();
-            foreach (var property in properties)
+            foreach (var property in _propertyInfo)
             {
                 param.Add($"@{property.Name}", property.GetValue(entity));
             }
@@ -159,13 +150,38 @@ namespace BaseBackend.Infrastructure
         /// Created by: nkmdang (20/09/2023)
         public virtual async Task<List<TEntity>> InsertManyAsync(List<TEntity> entities)
         {
-            var listResult = new List<TEntity>();
-            for (int i = 0; i < entities.Count; i++)
+            var tableName = (entities.FirstOrDefault() as BaseEntity)?.TableName;
+
+            // Prepare columns and values
+            var columns = _propertyInfo.Select(p => p.GetCustomAttribute<PropertyEntity>()?.ColumnName).ToList();
+            var columnString = string.Join(", ", columns);
+
+            var valuesList = new List<string>();
+            var param = new DynamicParameters();
+
+            // Iterate through entities
+            int index = 0;
+            foreach (var entity in entities)
             {
-                var result = await InsertAsync(entities[i]);
-                listResult.Add(result);
+                // Prepare value placeholders for each entity
+                var valuePlaceholders = _propertyInfo.Select(p => $"@{p.Name}{index}").ToList();
+                valuesList.Add($"({string.Join(", ", valuePlaceholders)})");
+
+                // Add parameters for the current entity
+                foreach (var property in _propertyInfo)
+                {
+                    param.Add($"@{property.Name}{index}", property.GetValue(entity));
+                }
+                index++;
             }
-            return listResult;
+
+            string valueString = string.Join(", ", valuesList);
+            string sql = $"INSERT INTO {tableName} ({columnString}) VALUES {valueString};";
+
+            // Execute the query
+            var result = await Uow.Connection.ExecuteAsync(sql, param, transaction: Uow.Transaction);
+
+            return entities;
         }
 
 
@@ -177,16 +193,51 @@ namespace BaseBackend.Infrastructure
         /// Created by: nkmdang (20/09/2023)
         public virtual async Task<TEntity> UpdateAsync(TEntity entity)
         {
-            var param = new DynamicParameters();
-            Type type = entity.GetType();
-            PropertyInfo[] properties = type.GetProperties();
-            foreach (var property in properties)
+            // Lấy tên bảng
+            var tableName = (entity as BaseEntity)?.TableName;
+
+            var idValue = entity.GetId();
+            
+
+            // Lấy danh sách các cột cần update, trừ Id và Version
+            var columns = _propertyInfo
+                .Where(p => p.Name != "Id" && p.Name != "Version")
+                .Select(p => $"{p.GetCustomAttribute<PropertyEntity>()?.ColumnName} = @{p.Name}")
+                .ToList();
+
+            string setClause = string.Join(", ", columns);
+
+            // Tạo câu lệnh SQL Update có kiểm tra version
+            string query = $@"
+        UPDATE {tableName}
+        SET {setClause}, Version = Version + 1
+        WHERE Id = @Id ";
+            if (entity.HasVersion)
             {
-                param.Add("p_" + property.Name, property.GetValue(entity));
+                query += " \n AND Version = @Version";
             }
-            //// Thực thi truy vấn
-            var result = await Uow.Connection.QuerySingleOrDefaultAsync<TEntity>($"Proc_Update_", param, commandType: CommandType.StoredProcedure, transaction: Uow.Transaction);
-            return result;
+
+            var param = new DynamicParameters();
+            foreach (var property in _propertyInfo)
+            {
+                param.Add($"@{property.Name}", property.GetValue(entity));
+            }
+            var versionProperty = _propertyInfo.FirstOrDefault(p => p.Name == "Version");
+            var versionValue = versionProperty.GetValue(entity);
+            // Thêm Id và Version vào param
+            param.Add("@Id", idValue);
+            param.Add("@Version", versionValue);
+
+            // Thực thi truy vấn và kiểm tra xem có hàng nào bị ảnh hưởng (update thành công)
+            var affectedRows = await Uow.Connection.ExecuteAsync(query, param, transaction: Uow.Transaction);
+
+            // Nếu không có hàng nào bị update (có thể do version không khớp)
+            if (affectedRows == 0)
+            {
+                throw new InvalidException(SharedResource.ItemHasBeenChanged);
+            }
+            // Trả về entity
+            return entity;
         }
 
         /// <summary>
@@ -195,14 +246,18 @@ namespace BaseBackend.Infrastructure
         /// <param name="id">Định danh Entity</param>
         /// <returns>Số bản ghi đã xóa</returns>
         /// Created by: nkmdang (20/09/2023)
-        public async Task<int> DeleteAsync(Guid id)
+        public async Task<int> DeleteAsync(TIdKey id)
         {
             // Tạo câu lệnh SQL
-            string sql = $"SELECT * FROM WHERE  = @ID";
-            var param = new DynamicParameters();
-            param.Add("Id", id);
-            var result = await Uow.Connection.ExecuteAsync(sql, param, commandType: CommandType.StoredProcedure, transaction: Uow.Transaction);
-            return result;
+            if (Activator.CreateInstance(_type) is BaseEntity _entity)
+            {
+                string sql = $"DELETE FROM {_entity.TableName} WHERE {_entity.IdColumnName} = @ID";
+                var param = new DynamicParameters();
+                param.Add("Id", id);
+                var result = await Uow.Connection.ExecuteAsync(sql, param, commandType: CommandType.StoredProcedure, transaction: Uow.Transaction);
+                return result;
+            }
+            throw new InvalidException("Entity không phải BaseEntity");
         }
 
         /// <summary>
@@ -211,49 +266,82 @@ namespace BaseBackend.Infrastructure
         /// <param name="ids">Danh sách các dịnh danh Entity</param>
         /// <returns>Số bản ghi đã xóa</returns>
         /// Created by: nkmdang (20/09/2023)
-        public async Task<int> DeleteManyAsync(List<TEntity> entities)
+        public async Task<int> DeleteManyAsync(List<TIdKey> ids)
         {
             // Tạo câu lệnh SQL
-            string sql = $"Proc_Delete_sByListId";
+            string sql = $"DELETE FROM {_entity.TableName} WHERE {_entity.IdColumnName} IN @IDS";
 
             var param = new DynamicParameters();
-            var ids = entities.Select(entity => entity.GetId()).ToList();
-            param.Add("ids", ids);
-            var result = await Uow.Connection.ExecuteAsync(sql, param, commandType: CommandType.StoredProcedure, transaction: Uow.Transaction);
+            param.Add("@IDS", ids);
+            var result = await Uow.Connection.ExecuteAsync(sql, param, transaction: Uow.Transaction);
             return result;
         }
 
-        /// <summary>
-        /// Hàm lấy ra số bản ghi thỏa mãn tiêu chí đang xem
-        /// </summary>
-        /// <param name="property"></param>
-        /// <param name="parentId"></param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
-        public async Task<int> GetNumberRecordsAsync(string? property)
+        public async Task<int> SoftDeleteAsync(TIdKey id)
         {
-            string sql = $"SELECT * FROM WHERE  = @ID";
+            string sql = $@"UPDATE {_entity.TableName} SET DELETED = {SharedResource.IsDeleted} WHERE {_entity.IdColumnName} = @Id";
             var param = new DynamicParameters();
-            param.Add("p_SearchProperty", property);
-            var result = await Uow.Connection.QuerySingleAsync<int>(sql, param, commandType: CommandType.StoredProcedure, transaction: Uow.Transaction);
-            return result;
+            param.Add("@Id", id);
+            int affectRow = await Uow.Connection.ExecuteAsync(sql, transaction: Uow.Transaction);
+            return affectRow;
         }
-
-        public async Task<int> SoftDeleteAsync(Guid id)
+        public async Task<int> SoftDeleteManyAsync(List<TIdKey> ids)
         {
-            if (Activator.CreateInstance(_type) is BaseEntity baseEntity)
-            {
-                string sql = $@"UPDATE {baseEntity.TableName} SET DELETED = {SharedResource.IsDeleted}";
-                await Uow.Connection.ExecuteAsync(sql);
-                return 1;
-            }
-            return 0;
-        }
-        public Task<int> SoftDeleteManyAsync(List<Guid> ids)
-        {
-            throw new NotImplementedException();
+            string sql = $@"UPDATE {_entity.TableName} SET DELETED = {SharedResource.IsDeleted} WHERE {_entity.IdColumnName} IN @Id";
+            var param = new DynamicParameters();
+            param.Add("@Id", ids);
+            int affectRow = await Uow.Connection.ExecuteAsync(sql, transaction: Uow.Transaction);
+            return affectRow;
         }
 
         public abstract Task<List<TEntity>> GetPaging(PagingInfo pagingInfo, TFilter filter);
+
+        public virtual async Task<int> UpdateManyAsync(List<TEntity> entities)
+        {
+            var tableName = (entities.FirstOrDefault() as BaseEntity)?.TableName;
+
+            // Prepare columns for update
+            var columns = _propertyInfo.Select(p => p.GetCustomAttribute<PropertyEntity>()?.ColumnName).ToList();
+
+            var param = new DynamicParameters();
+            var updateQueries = new List<string>();
+
+            // Iterate through entities
+            int index = 0;
+            foreach (var entity in entities)
+            {
+                var setClauses = new List<string>();
+
+                // Prepare SET clause for each property
+                foreach (var property in _propertyInfo)
+                {
+                    var columnName = property.GetCustomAttribute<PropertyEntity>()?.ColumnName;
+                    if (!string.IsNullOrEmpty(columnName))
+                    {
+                        setClauses.Add($"{columnName} = @{property.Name}{index}");
+                        param.Add($"@{property.Name}{index}", property.GetValue(entity));
+                    }
+                }
+
+                // Assuming there's a primary key for where clause, e.g., "Id" column
+                var primaryKey = _entity.IdColumnName;
+                var primaryKeyValue = _propertyInfo.FirstOrDefault(p => p.Name == primaryKey)?.GetValue(entity);
+                param.Add($"@{primaryKey}{index}", primaryKeyValue);
+
+                // Construct the update query for the current entity
+                var setClauseString = string.Join(", ", setClauses);
+                updateQueries.Add($"UPDATE {tableName} SET {setClauseString} WHERE {primaryKey} = @{primaryKey}{index};");
+
+                index++;
+            }
+
+            // Join all update queries
+            var sql = string.Join(" \n", updateQueries);
+
+            // Execute the query
+            var result = await Uow.Connection.ExecuteAsync(sql, param, transaction: Uow.Transaction);
+
+            return result;
+        }
     }
 }

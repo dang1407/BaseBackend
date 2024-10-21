@@ -5,7 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BaseBackend.Application {
+namespace BaseBackend.Application
+{
     public class BaseDTO
     {
         /// <summary>

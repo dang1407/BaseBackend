@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Application
 {
-    public interface IBaseReadOnlyService<TDTO, TFilter> where TFilter : BaseFilter
+    public interface IBaseReadOnlyService<TDTO, TFilter, TIdKey> where TFilter : BaseFilter
     {
         /// <summary>
         /// Hàm lấy ra tất cả bản ghi
@@ -23,7 +23,7 @@ namespace BaseBackend.Application
         /// <param name="id">Định danh của Entity (Guid)</param>
         /// <returns>Thông tin Entity nếu thành công, null nếu thất bại</returns>
         /// Created by: nkmdang (20/09/2023)
-        Task<TDTO> FindByIdAsync(Guid id);
+        Task<TDTO> FindByIdAsync(TIdKey id);
 
         /// <summary>
         /// Hàm lấy thông tin Entity theo Id
@@ -31,6 +31,6 @@ namespace BaseBackend.Application
         /// <param name="id">Định danh của Entity (Guid)</param>
         /// <returns>Thông tin Entity nếu thành công, null nếu thất bại</returns>
         /// Created by: nkmdang (20/09/2023)
-        Task<TDTO> GetByIdAsync(Guid id);
+        Task<TDTO> GetByIdAsync(TIdKey id);
     }
 }
