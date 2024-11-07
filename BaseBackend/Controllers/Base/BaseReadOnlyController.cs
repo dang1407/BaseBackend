@@ -13,9 +13,16 @@ namespace BaseBackend.Controllers.Base
         protected readonly IBaseReadOnlyService<TDTO, TFilter, TIdKey> BaseReadOnlyService;
 
         protected RequestDTO dtoResponse = new RequestDTO();
-        public BaseReadOnlyController(IBaseReadOnlyService<TDTO, TFilter, TIdKey> baseReadOnlyService)
+        //protected ILogger<BaseReadOnlyController<TDTO, TFilter, TIdKey>> Logger;
+        protected int PageId { get; set; }
+        public BaseReadOnlyController(IBaseReadOnlyService<TDTO, TFilter, TIdKey> baseReadOnlyService, int? pageId)
         {
             BaseReadOnlyService = baseReadOnlyService;
+            //Logger = logger;
+            if (pageId.HasValue) 
+            {
+                PageId = pageId.Value;
+            }
         }
 
         // Các hàm get chung sẽ được viết ở đây tùy theo nhu cầu dự án
@@ -23,6 +30,7 @@ namespace BaseBackend.Controllers.Base
         [Route("paging")]
         public async Task<IActionResult> GetPaging([FromBody] RequestDTO request)
         {
+            BaseReadOnlyService.CheckPagePermision(PageId, "View");
             dtoResponse.dtos = await BaseReadOnlyService.GetPaging(request.PagingInfo, request.Filter);
             return Ok(dtoResponse);
         }

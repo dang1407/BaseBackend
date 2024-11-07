@@ -32,5 +32,6 @@ namespace BaseBackend.Application
         /// <returns>Thông tin Entity nếu thành công, null nếu thất bại</returns>
         /// Created by: nkmdang (20/09/2023)
         Task<TDTO> GetByIdAsync(TIdKey id);
+        void CheckPagePermision(int? pageId, string funcCode);
     }
 }

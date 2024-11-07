@@ -13,7 +13,7 @@ namespace BaseBackend.Application
 {
     public class AccountService : BaseService<Account, AccountDTO, AccountFilter, Guid>, IAccountService
     {
-        public AccountService(IAccountRepository baseRepository, IMapper mapper, IMemoryCache memoryCache) : base(baseRepository, mapper, memoryCache)
+        public AccountService(IAccountRepository baseRepository, IMapper mapper, IMemoryCache memoryCache, IPermisionService permisionService) : base(baseRepository, mapper, memoryCache, permisionService)
         {
         }
     }

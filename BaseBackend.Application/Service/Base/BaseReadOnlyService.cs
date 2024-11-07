@@ -12,10 +12,20 @@ namespace BaseBackend.Application
     {
         protected readonly IBaseRepository<TEntity, TFilter, TIdKey> BaseRepository;
         protected readonly IMapper Mapper;
-        protected BaseReadOnlyService(IBaseRepository<TEntity, TFilter, TIdKey> baseRepository, IMapper mapper)
+        protected readonly IPermisionService PermisionService;
+        protected BaseReadOnlyService(IBaseRepository<TEntity, TFilter, TIdKey> baseRepository, IMapper mapper, IPermisionService permisionService)
         {
             BaseRepository = baseRepository;
             Mapper = mapper;
+            PermisionService = permisionService;
+        }
+
+        public void CheckPagePermision(int? pageId, string funcCode)
+        {
+            if (pageId.HasValue)
+            {
+                PermisionService.CheckPagePermisions(pageId.Value, funcCode);
+            }
         }
 
 
@@ -40,14 +50,14 @@ namespace BaseBackend.Application
         /// Created by: nkmdang (20/09/2023)
         public virtual async Task<TDTO> GetByIdAsync(TIdKey id)
         {
-            var entity = await BaseRepository.GetByIdAsync(id); 
-            var result = MapEntityToDTO(entity);    
-            return result;  
+            var entity = await BaseRepository.GetByIdAsync(id);
+            var result = MapEntityToDTO(entity);
+            return result;
         }
 
         public async Task<List<TDTO>> GetPaging(PagingInfo pagingInfo, TFilter filter)
         {
-            if(pagingInfo.PageIndex < 1)
+            if (pagingInfo.PageIndex < 1)
             {
                 pagingInfo.PageIndex = 0;
             }
@@ -55,7 +65,7 @@ namespace BaseBackend.Application
             {
                 pagingInfo.PageIndex = pagingInfo.PageIndex - 1;
             }
-            List<TEntity> entities = await BaseRepository.GetPaging(pagingInfo, filter);
+            List<TEntity> entities = await BaseRepository.GetPagingAsync(pagingInfo, filter);
             List<TDTO> result = entities.Select(e => Mapper.Map<TDTO>(e)).ToList();
             return result;
         }
@@ -70,9 +80,9 @@ namespace BaseBackend.Application
         public virtual TDTO MapEntityToDTO(TEntity entity)
         {
             var dto = Mapper.Map<TDTO>(entity);
-            return dto; 
+            return dto;
         }
 
-       
+
     }
 }

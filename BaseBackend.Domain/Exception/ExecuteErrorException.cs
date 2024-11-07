@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Domain
 {
-    public class InvalidException : BaseException
+    public class ExecuteErrorException : BaseException
     {
-        public InvalidException(string message) : base(message, 400)
+        public ExecuteErrorException(string message) 
         {
-            DevMessage = message;
             UserMessage = message;
+            DevMessage = message;
         }
     }
 }

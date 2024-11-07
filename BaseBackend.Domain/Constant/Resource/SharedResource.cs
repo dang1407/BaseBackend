@@ -12,7 +12,10 @@ namespace BaseBackend.Domain.Constant
         public readonly static int IsDeleted = 1;
         public readonly static int DefaultPageSize = 20;
 
+        #region Error Message
         public readonly static string ItemNotFoundMessage = "Không tìm thấy tài nguyên";
         public readonly static string ItemHasBeenChanged = "Dữ liệu đã bị thay đổi. Vui lòng tải lại trang!";
+        public readonly static string InsertErrorMessage = "Lỗi khi thêm mới bản ghi";
+        #endregion
     }
 }

@@ -10,7 +10,6 @@ namespace BaseBackend.Application
     public class EmployeeDTO : BaseDTO
     {
         public Guid EmployeeId { get; set; }
-
         public string? EmployeeCode { get; set; }
 
         public string? FullName { get; set; }
@@ -28,6 +27,8 @@ namespace BaseBackend.Application
         public string? Email { get; set; }
         public string? AvatarLink { get; set; }
         public Guid DepartmentId { get; set; }
+        public int Version { get; set; }
+        public int Deleted { get; set; }
 
         #region Extend Members
         public string? TitleName { get; set; }

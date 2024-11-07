@@ -45,6 +45,10 @@ namespace BaseBackend.Domain
         [PropertyEntity("AvatarLink")]
         public string? AvatarLink { get; set; }
 
+        [PropertyEntity("Version")]
+        public int Version { get; set; }
+        [PropertyEntity("Deleted")]
+        public int Deleted {  get; set; }    
         #region Extend Members
         public Guid DepartmentId { get; set; }
         public string? TitleName { get; set; }

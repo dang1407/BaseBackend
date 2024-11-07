@@ -11,6 +11,12 @@ namespace BaseBackend.Application
 {
     public static class Util
     {
+
+        /// <summary>
+        /// Bóc tách các thông tin từ JWT và truyền từ Controller vào Service để gán cho các Entity để đập vào DB
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public static CachedUserInfo GetUserInforFromRequest(HttpContext context)
         {
             CachedUserInfo userInfo = new CachedUserInfo();

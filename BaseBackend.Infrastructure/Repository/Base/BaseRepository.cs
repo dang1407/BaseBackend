@@ -5,6 +5,7 @@ using BaseBackend.Application;
 using BaseBackend.Domain;
 using System.Data.Common;
 using BaseBackend.Domain.Constant;
+using System.Transactions;
 
 
 namespace BaseBackend.Infrastructure
@@ -45,14 +46,14 @@ namespace BaseBackend.Infrastructure
             var idColumnName = _entity.IdColumnName;
 
             // Tạo câu truy vấn
-            var sql = $"SELECT * FROM {tableName} WHERE {idColumnName} = @ID";
+            var query = $"SELECT * FROM {tableName} WHERE {idColumnName} = @ID";
 
             // Tạo param
             var param = new DynamicParameters();
             param.Add("ID", id);
 
             // Thực hiện truy vấn
-            var result = await Uow.Connection.QueryFirstOrDefaultAsync<TEntity>(sql, param);
+            var result = await Uow.Connection.QueryFirstOrDefaultAsync<TEntity>(query, param);
             return result;
         }
 
@@ -103,14 +104,14 @@ namespace BaseBackend.Infrastructure
             var idColumnName = _entity.IdColumnName;
 
             // Tạo câu truy vấn
-            var sql = $"SELECT * FROM {tableName} WHERE {idColumnName} IN @ID";
+            var query = $"SELECT * FROM {tableName} WHERE {idColumnName} IN @ID";
 
             // Tạo param
             var param = new DynamicParameters();
             param.Add("ID", ids);
 
             // Thực hiện truy vấn
-            var result = await Uow.Connection.QueryAsync<TEntity>(sql, param);
+            var result = await Uow.Connection.QueryAsync<TEntity>(query, param);
             return result.ToList();
         }
 
@@ -130,16 +131,15 @@ namespace BaseBackend.Infrastructure
             string columnString = string.Join(", ", columns);
             string valueString = string.Join(", ", values);
 
-            string sql = $"INSERT INTO {_entity.TableName} ({columnString}) VALUES ({valueString});";
+            string query = $"INSERT INTO {_entity.TableName} ({columnString}) VALUES ({valueString});";
             var param = new DynamicParameters();
             foreach (var property in _propertyInfo)
             {
                 param.Add($"@{property.Name}", property.GetValue(entity));
             }
             // Thực thi truy vấn
-            var result = await Uow.Connection.QuerySingleOrDefaultAsync<TEntity>(sql, param, transaction: Uow.Transaction);
-
-            return entity;
+            var result = await Uow.Connection.QuerySingleOrDefaultAsync<TEntity>(query, param, transaction: Uow.Transaction);
+                return entity;
         }
 
         /// <summary>
@@ -176,10 +176,10 @@ namespace BaseBackend.Infrastructure
             }
 
             string valueString = string.Join(", ", valuesList);
-            string sql = $"INSERT INTO {tableName} ({columnString}) VALUES {valueString};";
+            string query = $"INSERT INTO {tableName} ({columnString}) VALUES {valueString};";
 
             // Execute the query
-            var result = await Uow.Connection.ExecuteAsync(sql, param, transaction: Uow.Transaction);
+            var result = await Uow.Connection.ExecuteAsync(query, param, transaction: Uow.Transaction);
 
             return entities;
         }
@@ -207,7 +207,7 @@ namespace BaseBackend.Infrastructure
 
             string setClause = string.Join(", ", columns);
 
-            // Tạo câu lệnh SQL Update có kiểm tra version
+            // Tạo câu lệnh query Update có kiểm tra version
             string query = $@"
         UPDATE {tableName}
         SET {setClause}, Version = Version + 1
@@ -248,13 +248,13 @@ namespace BaseBackend.Infrastructure
         /// Created by: nkmdang (20/09/2023)
         public async Task<int> DeleteAsync(TIdKey id)
         {
-            // Tạo câu lệnh SQL
+            // Tạo câu lệnh query
             if (Activator.CreateInstance(_type) is BaseEntity _entity)
             {
-                string sql = $"DELETE FROM {_entity.TableName} WHERE {_entity.IdColumnName} = @ID";
+                string query = $"DELETE FROM {_entity.TableName} WHERE {_entity.IdColumnName} = @ID";
                 var param = new DynamicParameters();
                 param.Add("Id", id);
-                var result = await Uow.Connection.ExecuteAsync(sql, param, commandType: CommandType.StoredProcedure, transaction: Uow.Transaction);
+                var result = await Uow.Connection.ExecuteAsync(query, param, commandType: CommandType.StoredProcedure, transaction: Uow.Transaction);
                 return result;
             }
             throw new InvalidException("Entity không phải BaseEntity");
@@ -268,33 +268,33 @@ namespace BaseBackend.Infrastructure
         /// Created by: nkmdang (20/09/2023)
         public async Task<int> DeleteManyAsync(List<TIdKey> ids)
         {
-            // Tạo câu lệnh SQL
-            string sql = $"DELETE FROM {_entity.TableName} WHERE {_entity.IdColumnName} IN @IDS";
+            // Tạo câu lệnh query
+            string query = $"DELETE FROM {_entity.TableName} WHERE {_entity.IdColumnName} IN @IDS";
 
             var param = new DynamicParameters();
             param.Add("@IDS", ids);
-            var result = await Uow.Connection.ExecuteAsync(sql, param, transaction: Uow.Transaction);
+            var result = await Uow.Connection.ExecuteAsync(query, param, transaction: Uow.Transaction);
             return result;
         }
 
         public async Task<int> SoftDeleteAsync(TIdKey id)
         {
-            string sql = $@"UPDATE {_entity.TableName} SET DELETED = {SharedResource.IsDeleted} WHERE {_entity.IdColumnName} = @Id";
+            string query = $@"UPDATE {_entity.TableName} SET DELETED = {SharedResource.IsDeleted} WHERE {_entity.IdColumnName} = @Id";
             var param = new DynamicParameters();
             param.Add("@Id", id);
-            int affectRow = await Uow.Connection.ExecuteAsync(sql, transaction: Uow.Transaction);
+            int affectRow = await Uow.Connection.ExecuteAsync(query, transaction: Uow.Transaction);
             return affectRow;
         }
         public async Task<int> SoftDeleteManyAsync(List<TIdKey> ids)
         {
-            string sql = $@"UPDATE {_entity.TableName} SET DELETED = {SharedResource.IsDeleted} WHERE {_entity.IdColumnName} IN @Id";
+            string query = $@"UPDATE {_entity.TableName} SET DELETED = {SharedResource.IsDeleted} WHERE {_entity.IdColumnName} IN @Id";
             var param = new DynamicParameters();
             param.Add("@Id", ids);
-            int affectRow = await Uow.Connection.ExecuteAsync(sql, transaction: Uow.Transaction);
+            int affectRow = await Uow.Connection.ExecuteAsync(query, transaction: Uow.Transaction);
             return affectRow;
         }
 
-        public abstract Task<List<TEntity>> GetPaging(PagingInfo pagingInfo, TFilter filter);
+        public abstract Task<List<TEntity>> GetPagingAsync(PagingInfo pagingInfo, TFilter filter);
 
         public virtual async Task<int> UpdateManyAsync(List<TEntity> entities)
         {
@@ -336,12 +336,126 @@ namespace BaseBackend.Infrastructure
             }
 
             // Join all update queries
-            var sql = string.Join(" \n", updateQueries);
+            var query = string.Join(" \n", updateQueries);
 
             // Execute the query
-            var result = await Uow.Connection.ExecuteAsync(sql, param, transaction: Uow.Transaction);
+            var result = await Uow.Connection.ExecuteAsync(query, param, transaction: Uow.Transaction);
 
             return result;
+        }
+
+        public int Insert(TEntity entity)
+        {
+            var tableName = (entity as BaseEntity)?.TableName;
+
+            var columns = _propertyInfo.Select(p => p.GetCustomAttribute<PropertyEntity>()?.ColumnName).ToList();
+            var values = _propertyInfo.Select(p => $"@{p.Name}").ToList();
+
+            string columnString = string.Join(", ", columns);
+            string valueString = string.Join(", ", values);
+
+            string query = $"INSERT INTO {_entity.TableName} ({columnString}) VALUES ({valueString});";
+            var param = new DynamicParameters();
+            foreach (var property in _propertyInfo)
+            {
+                param.Add($"@{property.Name}", property.GetValue(entity));
+            }
+            // Thực thi truy vấn
+            using (Uow.Connection)
+            {
+                using (TransactionScope trans = new TransactionScope()) 
+                {
+                    int affectRow = Uow.Connection.Execute(query, param);
+                    if(affectRow == 0)
+                    {
+                        throw new ExecuteErrorException(SharedResource.InsertErrorMessage);
+                    }
+                    trans.Complete();
+                    return affectRow;
+                }
+            }
+            
+        }
+
+        public int Update(TEntity entity)
+        {
+            // Lấy tên bảng
+            var tableName = (entity as BaseEntity)?.TableName;
+
+            var idValue = entity.GetId();
+
+
+            // Lấy danh sách các cột cần update, trừ Id và Version
+            var columns = _propertyInfo
+                .Where(p => p.Name != "Id" && p.Name != "Version")
+                .Select(p => $"{p.GetCustomAttribute<PropertyEntity>()?.ColumnName} = @{p.Name}")
+                .ToList();
+
+            string setClause = string.Join(", ", columns);
+
+            // Tạo câu lệnh query Update có kiểm tra version
+            string query = $@"
+        UPDATE {tableName}
+        SET {setClause}, Version = Version + 1
+        WHERE Id = @Id ";
+            if (entity.HasVersion)
+            {
+                query += " \n AND Version = @Version";
+            }
+
+            var param = new DynamicParameters();
+            foreach (var property in _propertyInfo)
+            {
+                param.Add($"@{property.Name}", property.GetValue(entity));
+            }
+            var versionProperty = _propertyInfo.FirstOrDefault(p => p.Name == "Version");
+            var versionValue = versionProperty.GetValue(entity);
+            // Thêm Id và Version vào param
+            param.Add("@Id", idValue);
+            param.Add("@Version", versionValue);
+
+            // Thực thi truy vấn và kiểm tra xem có hàng nào bị ảnh hưởng (update thành công)
+            using (Uow.Connection)
+            {
+                using (TransactionScope trans = new TransactionScope())
+                {
+                    int affectRow = Uow.Connection.Execute(query, param);
+                    if (affectRow == 0)
+                    {
+                        throw new ExecuteErrorException(SharedResource.InsertErrorMessage);
+                    }
+                    trans.Complete();
+                    return affectRow;
+                }
+            }
+        }
+
+        public int SoftDelete(TIdKey id)
+        {
+            string query = $@"UPDATE {_entity.TableName} SET DELETED = {SharedResource.IsDeleted} WHERE {_entity.IdColumnName} = @Id";
+            var param = new DynamicParameters();
+            param.Add("@Id", id);
+            int affectRow = Uow.Connection.Execute(query, transaction: Uow.Transaction);
+            return affectRow;
+        }
+
+        public int DeleteById(TIdKey id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int DeleteManyByIds(List<TIdKey> ids)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int SoftDeleteMany(List<TIdKey> ids)
+        {
+            string query = $@"UPDATE {_entity.TableName} SET DELETED = {SharedResource.IsDeleted} WHERE {_entity.IdColumnName} IN @Id";
+            var param = new DynamicParameters();
+            param.Add("@Id", ids);
+            int affectRow =  Uow.Connection.Execute(query, transaction: Uow.Transaction);
+            return affectRow;
         }
     }
 }

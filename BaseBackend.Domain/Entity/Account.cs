@@ -23,6 +23,9 @@ namespace BaseBackend.Domain
         public string Role { get; set; } = string.Empty;
         [PropertyEntity("CompanyId")]
         public Guid CompanyId { get; set; }
+        [PropertyEntity("Version")]
+        public int Version { get; set; }
+        [PropertyEntity("Deleted")]
         public Guid GetId()
         {
             return AccountId;

@@ -9,6 +9,7 @@ namespace BaseBackend.Domain
 {
     public class NotFoundException : BaseException
     {
+        
         public NotFoundException() { }
 
         public NotFoundException(int errorCode)
@@ -33,7 +34,7 @@ namespace BaseBackend.Domain
         /// <param name="message">Nội dung NotFoundException</param>
         /// <param name="errorCode">Mã lỗi của NotFoundException</param>
         /// Created by: nkmdang (18/09/2023)
-        public NotFoundException(string userMessage, int errorCode) 
+        public NotFoundException(string userMessage, int errorCode) : base(userMessage, errorCode)
         {
             UserMessage = userMessage;
             ErrorCode = errorCode;

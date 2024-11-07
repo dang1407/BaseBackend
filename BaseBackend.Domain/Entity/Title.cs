@@ -18,6 +18,9 @@ namespace BaseBackend.Domain
         public string TitleName { get; set; } = string.Empty;
         [PropertyEntity("DepartmentId")]
         public Guid DepartmentId { get; set; }
+        [PropertyEntity("Version")]
+        public int Version { get; set; }
+        [PropertyEntity("Deleted")]
         #region Extend Member
         public string DepartmentName { get; set; } = string.Empty;
         #endregion

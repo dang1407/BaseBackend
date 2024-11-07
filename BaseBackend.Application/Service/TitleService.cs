@@ -14,7 +14,7 @@ namespace BaseBackend.Application
 {
     public class TitleService : BaseService<Title, TitleDTO,TitleFilter, Guid>, ITitleService
     {
-        public TitleService(ITitleRepository baseRepository, IMapper mapper, IMemoryCache memoryCache, IHttpContextAccessor httpContextAccessor) : base(baseRepository, mapper, memoryCache)
+        public TitleService(ITitleRepository baseRepository, IMapper mapper, IMemoryCache memoryCache, IPermisionService permisionService) : base(baseRepository, mapper, memoryCache, permisionService)
         {
         }
     }

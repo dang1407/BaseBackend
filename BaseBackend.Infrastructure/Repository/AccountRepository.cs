@@ -16,7 +16,7 @@ namespace BaseBackend.Infrastructure
         {
         }
 
-        public override async Task<List<Account>> GetPaging(PagingInfo pagingInfo, AccountFilter filter)
+        public override async Task<List<Account>> GetPagingAsync(PagingInfo pagingInfo, AccountFilter filter)
         {
             string query = $"SELECT * FROM ACCOUNT WHERE Deleted = {SharedResource.IsNotDelete}";
             if (!string.IsNullOrWhiteSpace(filter.UserName)) 

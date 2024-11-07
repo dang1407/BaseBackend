@@ -17,7 +17,7 @@ namespace BaseBackend.Infrastructure
         {
         }
 
-        public override async Task<List<Title>> GetPaging(PagingInfo pagingInfo, TitleFilter filter)
+        public override async Task<List<Title>> GetPagingAsync(PagingInfo pagingInfo, TitleFilter filter)
         {
             string query = $@"
                 SELECT t.* FROM title t WHERE t.Deleted = {SharedResource.IsNotDelete}

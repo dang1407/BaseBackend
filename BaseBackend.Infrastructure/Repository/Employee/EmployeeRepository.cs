@@ -16,7 +16,7 @@ namespace BaseBackend.Infrastructure
         public EmployeeRepository(IUnitOfWork unitOfWork) : base(unitOfWork) 
         { }
 
-        public override async Task<List<Employee>> GetPaging(PagingInfo pagingInfo, EmployeeFilter filter)
+        public override async Task<List<Employee>> GetPagingAsync(PagingInfo pagingInfo, EmployeeFilter filter)
         {
             string sql = 
             $@"

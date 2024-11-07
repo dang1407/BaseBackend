@@ -17,7 +17,7 @@ namespace BaseBackend.Application
         private readonly Type _type = typeof(TEntity);
         private BaseEntity _entity;
         private readonly IMemoryCache _memoryCache;
-        protected BaseService(IBaseRepository<TEntity, TFilter, TIdKey> baseRepository, IMapper mapper, IMemoryCache memoryCache) : base(baseRepository, mapper)
+        protected BaseService(IBaseRepository<TEntity, TFilter, TIdKey> baseRepository, IMapper mapper, IMemoryCache memoryCache, IPermisionService permisionService) : base(baseRepository, mapper, permisionService)
         {
             _memoryCache = memoryCache;
             if (Activator.CreateInstance(_type) is BaseEntity entity)

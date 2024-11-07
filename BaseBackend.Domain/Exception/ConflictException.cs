@@ -9,7 +9,7 @@ namespace BaseBackend.Domain
 {
     public class ConflictException : BaseException
     {
-
+        
         public ConflictException() { }
 
         public ConflictException(int errorCode)

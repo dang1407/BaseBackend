@@ -10,7 +10,7 @@ namespace BaseBackend.Controllers
     public class BaseController<TDTO, TFilter, TIdKey> : BaseReadOnlyController<TDTO, TFilter, TIdKey> where TFilter : BaseFilter
     {
         protected readonly IBaseService<TDTO, TFilter, TIdKey> BaseService;
-        public BaseController(IBaseService<TDTO, TFilter, TIdKey> baseService) : base(baseService)
+        public BaseController(IBaseService<TDTO, TFilter, TIdKey> baseService, int? pageId) : base(baseService, pageId)
         {
             BaseService = baseService;
         }

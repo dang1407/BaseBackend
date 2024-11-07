@@ -18,7 +18,7 @@ namespace BaseBackend.Application
     public class EmployeeService : BaseService<Employee, EmployeeDTO, EmployeeFilter, Guid>, IEmployeeService
     {
         private readonly IEmployeeRepository _repository;
-        public EmployeeService(IEmployeeRepository baseRepository, IMapper mapper, IMemoryCache memoryCache) : base(baseRepository, mapper, memoryCache)
+        public EmployeeService(IEmployeeRepository baseRepository, IMapper mapper, IMemoryCache memoryCache, IPermisionService permisionService) : base(baseRepository, mapper, memoryCache, permisionService)
         {
             _repository = baseRepository;
         }
@@ -39,7 +39,7 @@ namespace BaseBackend.Application
             PagingInfo pagingInfo = new PagingInfo();
             EmployeeFilter filter = new EmployeeFilter();
             filter.EmployeeCode = entity.EmployeeCode ?? "";
-            List<Employee> existEmp = await _repository.GetPaging(pagingInfo, filter);
+            List<Employee> existEmp = await _repository.GetPagingAsync(pagingInfo, filter);
             if (existEmp.Count > 0) 
             {
                 throw new ConflictException("EmployeeCode đã tồn tại");

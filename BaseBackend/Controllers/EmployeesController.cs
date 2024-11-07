@@ -9,7 +9,7 @@ namespace BaseBackend.Controllers
 {
     public class EmployeesController : BaseController<EmployeeDTO, EmployeeFilter, Guid>
     {
-        public EmployeesController(IEmployeeService employeeService) : base(employeeService)
+        public EmployeesController(IEmployeeService employeeService) : base(employeeService, 1)
         {
         }
     }

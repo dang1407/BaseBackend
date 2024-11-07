@@ -37,16 +37,16 @@ namespace BaseBackend.Middleware
             Console.WriteLine(exception);  
             context.Response.ContentType = "application/json";
 
-            if(exception is NotFoundException notFoundException)
+            if(exception is BaseException baseException)
             {
-                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                context.Response.StatusCode = baseException.StatusCode ?? 500;
                 await context.Response.WriteAsync(
-                    text: new BaseException()
+                    text: new ResponseException()
                     {
-                        ErrorCode = notFoundException.ErrorCode,
-                        UserMessage = notFoundException.UserMessage,
+                        ErrorCode = baseException.ErrorCode,
+                        UserMessage = baseException.UserMessage,
 #if DEBUG
-                        DevMessage = notFoundException.Message,
+                        DevMessage = baseException.Message,
 #else
                         DevMessage = "",
 #endif
@@ -54,28 +54,48 @@ namespace BaseBackend.Middleware
                         MoreInfo = exception.HelpLink,
                     }.ToString() ?? ""
                     );
-            } else if(exception is ConflictException conflictException)
-            {
-                context.Response.StatusCode = StatusCodes.Status409Conflict;
-                await context.Response.WriteAsync(
-                    text: new BaseException()
-                    {
-                        ErrorCode = conflictException.ErrorCode,
-                        UserMessage = conflictException.UserMessage,
-#if DEBUG
-                        DevMessage = conflictException.Message,
-#else
-                        DevMessage = "",
-#endif
-                        TraceId = context.TraceIdentifier,
-                        MoreInfo = exception.HelpLink,
-                    }.ToString() ?? ""
-                    );
-            } else
+            } 
+//            else if(exception is ConflictException conflictException)
+//            {
+//                context.Response.StatusCode = StatusCodes.Status409Conflict;
+//                await context.Response.WriteAsync(
+//                    text: new ResponseException()
+//                    {
+//                        ErrorCode = conflictException.ErrorCode,
+//                        UserMessage = conflictException.UserMessage,
+//#if DEBUG
+//                        DevMessage = conflictException.Message,
+//#else
+//                        DevMessage = "",
+//#endif
+//                        TraceId = context.TraceIdentifier,
+//                        MoreInfo = exception.HelpLink,
+//                    }.ToString() ?? ""
+//                    );
+//            }
+//            else if (exception is InvalidException baseException)
+//            {
+//                context.Response.StatusCode = 400;
+//                await context.Response.WriteAsync(
+//                    text: new ResponseException()
+//                    {
+//                        ErrorCode = baseException.ErrorCode,
+//                        UserMessage = baseException.UserMessage,
+//#if DEBUG
+//                        DevMessage = baseException.Message,
+//#else
+//                        DevMessage = "",
+//#endif
+//                        TraceId = context.TraceIdentifier,
+//                        MoreInfo = exception.HelpLink,
+//                    }.ToString() ?? ""
+//                    );
+//            }
+            else
             {
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                 await context.Response.WriteAsync(
-                    text: new BaseException()
+                    text: new ResponseException()
                     {
                         ErrorCode = context.Response.StatusCode,
                         UserMessage = "Lỗi hệ thống",
