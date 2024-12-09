@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Domain.Entity
 {
-    public class AdmFeature : BaseEntity, IEntity<int>
+    public class AdmFeature : BaseEntity
     {
 
         public AdmFeature() : base("AdmFeature", "FeatureId", true,true)
@@ -30,14 +30,24 @@ namespace BaseBackend.Domain.Entity
         public int Version {  get; set; }
         [PropertyEntity("Deleted")]
         public int Deleted { get; set; }
-        public int GetId()
+        public override int GetId()
         {
             return FeatureId;
         }
 
-        public void SetId(int id)
+        public override void SetDeleted(bool isDeleted)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void SetId(int id)
         {
             FeatureId = id;
+        }
+
+        public override void SetVersion(int version)
+        {
+            throw new NotImplementedException();
         }
     }
 }

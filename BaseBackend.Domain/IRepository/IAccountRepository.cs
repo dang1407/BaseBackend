@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Domain
 {
-    public interface IAccountRepository : IBaseRepository<Account, AccountFilter, Guid>
+    public interface IAccountRepository : IBaseRepository<Account, AccountFilter>
     {
     }
 }

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Infrastructure
 {
-    public class AccountRepository : BaseRepository<Account, AccountFilter, Guid>, IAccountRepository
+    public class AccountRepository : BaseRepository<Account, AccountFilter>, IAccountRepository
     {
         public AccountRepository(IUnitOfWork uow) : base(uow)
         {

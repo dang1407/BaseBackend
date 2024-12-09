@@ -27,7 +27,7 @@ namespace BaseBackend.Domain
         /// Người tạo
         /// </summary>
         [PropertyEntity("CreatedBy")]
-        public string? CreatedBy { get; set; }
+        public string CreatedBy { get; set; }
 
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace BaseBackend.Domain
         /// Người sửa
         /// </summary>
         [PropertyEntity("ModifiedBy")]
-        public string? ModifiedBy { get; set; }
+        public string ModifiedBy { get; set; }
         public BaseEntity(string tableName, string idColumnName, bool hasDeleted = true, bool hasVersion = true)
         {
             TableName = tableName;
@@ -49,5 +49,11 @@ namespace BaseBackend.Domain
             HasDeleted = hasDeleted;
             HasVersion = hasVersion;
         }
+
+        public abstract void SetId(int id);
+        public abstract int GetId();
+
+        public abstract void SetVersion(int version);
+        public abstract void SetDeleted(bool isDeleted);
     }
 }

@@ -9,7 +9,7 @@ namespace BaseBackend.Application
 {
     public class TitleDTO : BaseDTO
     {
-        public Guid? TitleId { get; set; }
+        public int TitleId { get; set; }
         public string TitleName { get; set; } = string.Empty;
         public Guid DepartmentId { get; set; }
         #region Extend Member

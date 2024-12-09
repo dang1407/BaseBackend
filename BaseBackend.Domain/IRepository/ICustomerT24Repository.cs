@@ -1,4 +1,4 @@
-﻿using BaseBackend.Domain.Filter;
+﻿using BaseBackend.Domain.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Domain
 {
-    public interface IEmployeeRepository : IBaseRepository<Employee, EmployeeFilter>
+    public interface ICustomerT24Repository : IBaseRepository<CustomerT24, CustomerT24Filter>
     {
+        void SeedAccountInfo();
     }
 }

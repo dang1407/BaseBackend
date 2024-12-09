@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Infrastructure
 {
-    public class AdmFeatureFunctionRepository : BaseRepository<AdmFeatureFunction, AdmFeatureFunctionFilter, int>, IAdmFeatureFunctionRepository
+    public class AdmFeatureFunctionRepository : BaseRepository<AdmFeatureFunction, AdmFeatureFunctionFilter>, IAdmFeatureFunctionRepository
     {
         public AdmFeatureFunctionRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
         {

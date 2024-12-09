@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Infrastructure
 {
-    public class EmployeeRepository : BaseRepository<Employee, EmployeeFilter, Guid>, IEmployeeRepository
+    public class EmployeeRepository : BaseRepository<Employee, EmployeeFilter>, IEmployeeRepository
     {
         public EmployeeRepository(IUnitOfWork unitOfWork) : base(unitOfWork) 
         { }

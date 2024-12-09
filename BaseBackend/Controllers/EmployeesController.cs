@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BaseBackend.Controllers
 {
-    public class EmployeesController : BaseController<EmployeeDTO, EmployeeFilter, Guid>
+    public class EmployeesController : BaseController<EmployeeDTO, EmployeeFilter>
     {
         public EmployeesController(IEmployeeService employeeService) : base(employeeService, 1)
         {

@@ -8,14 +8,14 @@ namespace BaseBackend.Controllers.Base
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class BaseReadOnlyController<TDTO, TFilter, TIdKey> : ControllerBase where TFilter : BaseFilter
+    public class BaseReadOnlyController<TDTO, TFilter> : ControllerBase where TFilter : BaseFilter
     {
-        protected readonly IBaseReadOnlyService<TDTO, TFilter, TIdKey> BaseReadOnlyService;
+        protected readonly IBaseReadOnlyService<TDTO, TFilter> BaseReadOnlyService;
 
         protected RequestDTO dtoResponse = new RequestDTO();
         //protected ILogger<BaseReadOnlyController<TDTO, TFilter, TIdKey>> Logger;
         protected int PageId { get; set; }
-        public BaseReadOnlyController(IBaseReadOnlyService<TDTO, TFilter, TIdKey> baseReadOnlyService, int? pageId)
+        public BaseReadOnlyController(IBaseReadOnlyService<TDTO, TFilter> baseReadOnlyService, int? pageId)
         {
             BaseReadOnlyService = baseReadOnlyService;
             //Logger = logger;
@@ -37,7 +37,7 @@ namespace BaseBackend.Controllers.Base
 
         [HttpGet]
         [Route("{id}")]
-        public async Task<IActionResult> GetById(TIdKey id)
+        public async Task<IActionResult> GetById(int id)
         {
             dtoResponse.dto = await BaseReadOnlyService.GetByIdAsync(id);
             return Ok(dtoResponse);

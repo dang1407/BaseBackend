@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Domain
 {
-    public class Employee : BaseEntity, IEntity<Guid>
+    public class Employee : BaseEntity
     {
         [PropertyEntity("EmployeeId")]
-        public Guid EmployeeId { get; set; }
+        public int EmployeeId { get; set; }
 
         [PropertyEntity("EmployeeCode")]
         public string? EmployeeCode { get; set; }
@@ -61,14 +61,24 @@ namespace BaseBackend.Domain
         {
         }
 
-        public Guid GetId()
+        public override int GetId()
         {
             return EmployeeId;
         }
 
-        public void SetId(Guid id)
+        public override void SetId(int id)
         {
             EmployeeId = id;
+        }
+
+        public override void SetVersion(int version)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void SetDeleted(bool isDeleted)
+        {
+            throw new NotImplementedException();
         }
     }
 }

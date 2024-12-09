@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Domain
 {
-    public interface IAdmFeatureFunctionRepository : IBaseRepository<AdmFeatureFunction, AdmFeatureFunctionFilter, int>
+    public interface IAdmFeatureFunctionRepository : IBaseRepository<AdmFeatureFunction, AdmFeatureFunctionFilter>
     {
         public List<string> CheckPagePermision(int pageId, string funcCode);
     }

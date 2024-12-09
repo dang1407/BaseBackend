@@ -6,19 +6,19 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Domain
 {
-    public interface IBaseRepository<TEntity, TFilter, TIdKey> where TFilter : BaseFilter where TEntity : BaseEntity, IEntity<TIdKey>
+    public interface IBaseRepository<TEntity, TFilter> where TFilter : BaseFilter where TEntity : BaseEntity
     {
 
         Task<List<TEntity>> GetPagingAsync(PagingInfo pagingInfo, TFilter filter);
 
-        Task<TEntity?> FindByIdAsync(TIdKey id);
+        Task<TEntity?> FindByIdAsync(int id);
         /// <summary>
         /// Hàm lấy thông tin Entity theo Id
         /// </summary>
         /// <param name="id">Định danh của Entity (Guid)</param>
         /// <returns>Thông tin Entity nếu thành công, null nếu thất bại</returns>
         /// Created by: nkmdang (19/09/2023)
-        Task<TEntity> GetByIdAsync(TIdKey id);
+        Task<TEntity> GetByIdAsync(int id);
 
         /// <summary>
         /// Hàm lấy thông tin nhiều Entity theo Id
@@ -26,7 +26,7 @@ namespace BaseBackend.Domain
         /// <param name="ids">Định danh của các Entity (Guid)</param>
         /// <returns>Thông tin các Entity nếu thành công, null nếu thất bại</returns>
         /// Created by: nkmdang (20/09/2023)
-        Task<List<TEntity>> GetByListIdAsync(List<TIdKey> ids);   
+        Task<List<TEntity>> GetByListIdAsync(List<int> ids);   
 
         /// <summary>
         /// Hàm thêm mới một Entity
@@ -62,17 +62,17 @@ namespace BaseBackend.Domain
         /// <param name="id">Định danh Entity</param>
         /// <returns>Số bản ghi đã xóa</returns>
         /// Created by: nkmdang (20/09/2023)
-        Task<int> SoftDeleteAsync(TIdKey id);
+        Task<int> SoftDeleteAsync(int id);
 
-        int SoftDelete(TIdKey id);
+        int SoftDelete(int id);
         /// <summary>
         /// Hàm cập nhật Deleted = 1 thông tin một Entity
         /// </summary>
         /// <param name="id">Định danh Entity</param>
         /// <returns>Số bản ghi đã xóa</returns>
         /// Created by: nkmdang (20/09/2023)
-        Task<int> SoftDeleteManyAsync(List<TIdKey> ids);
-        int SoftDeleteMany(List<TIdKey> ids);
+        Task<int> SoftDeleteManyAsync(List<int> ids);
+        int SoftDeleteMany(List<int> ids);
 
         /// <summary>
         /// Hàm xóa thông tin một Entity
@@ -80,16 +80,16 @@ namespace BaseBackend.Domain
         /// <param name="id">Định danh Entity</param>
         /// <returns>Số bản ghi đã xóa</returns>
         /// Created by: nkmdang (20/09/2023)
-        Task<int> DeleteAsync(TIdKey id);
-        int DeleteById(TIdKey id);
+        Task<int> DeleteAsync(int id);
+        int DeleteById(int id);
         /// <summary>
         /// Hàm xóa thông tin nhiều Entity
         /// </summary>
         /// <param name="ids">Danh sách các dịnh danh Entity</param>
         /// <returns>Số bản ghi đã xóa</returns>
         /// Created by: nkmdang (20/09/2023)
-        Task<int> DeleteManyAsync(List<TIdKey> ids);
+        Task<int> DeleteManyAsync(List<int> ids);
 
-        int DeleteManyByIds(List<TIdKey> ids);
+        int DeleteManyByIds(List<int> ids);
     }
 }

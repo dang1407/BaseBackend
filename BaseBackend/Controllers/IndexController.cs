@@ -13,5 +13,14 @@ namespace BaseBackend.Controllers
         {
             return Ok(GlobalCache.ListPagePermisions);
         }
+        [HttpGet]
+        [Route("config")]
+        public IActionResult GetConfig() 
+        {
+            return Ok(new
+            {
+                ScheduleAdmobMinute = 20
+            });
+        }
     }
 }

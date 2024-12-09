@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Application.IService
 {
-    public interface IEmployeeService : IBaseService<EmployeeDTO, EmployeeFilter, Guid>
+    public interface IEmployeeService : IBaseService<EmployeeDTO, EmployeeFilter>
     {
     }
 }

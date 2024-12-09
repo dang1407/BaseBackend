@@ -9,6 +9,7 @@ namespace BaseBackend.Domain
     public class FunctionRight : BaseEntity
     {
  
+        public int FunctionRightId { get; set; }
         public int FeatureId { get; set; }
         public int FunctionId { get; set; }
         public string FunctionCode { get; set; }
@@ -24,6 +25,26 @@ namespace BaseBackend.Domain
         public override string ToString()
         {
             return string.Format("{0}:{1}:{2}:{3}", FeatureId, FunctionId, FunctionCode);
+        }
+
+        public override void SetId(int id)
+        {
+            FunctionRightId = id;
+        }
+
+        public override int GetId()
+        {
+            return FunctionRightId;
+        }
+
+        public override void SetVersion(int version)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void SetDeleted(bool isDeleted)
+        {
+            throw new NotImplementedException();
         }
     }
 }

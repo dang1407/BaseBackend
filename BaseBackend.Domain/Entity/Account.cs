@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Domain
 {
-    public class Account : BaseEntity, IEntity<Guid>
+    public class Account : BaseEntity
     {
         public Account() : base("account", "AccountId", true, true)
         {
         }
         [PropertyEntity("AccountId")]
-        public Guid AccountId { get; set; }
+        public int AccountId { get; set; }
         [PropertyEntity("UserName")]
         public string UserName { get; set; } = string.Empty;
         [PropertyEntity("Password")]
@@ -26,14 +26,24 @@ namespace BaseBackend.Domain
         [PropertyEntity("Version")]
         public int Version { get; set; }
         [PropertyEntity("Deleted")]
-        public Guid GetId()
+        public override int GetId()
         {
             return AccountId;
         }
 
-        public void SetId(Guid id)
+        public override void SetDeleted(bool isDeleted)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void SetId(int id)
         {
             AccountId = id;
+        }
+
+        public override void SetVersion(int version)
+        {
+            throw new NotImplementedException();
         }
     }
 }

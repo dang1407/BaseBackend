@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Application
 {
-    public class AccountDTO
+    public class AccountDTO : BaseDTO
     {
-        public Guid AccountId { get; set; }
+        public int AccountId { get; set; }
         public string UserName { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;

@@ -2,7 +2,6 @@
 using BaseBackend.Application.IService;
 using BaseBackend.Domain;
 using BaseBackend.Domain.Filter;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
@@ -12,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Application
 {
-    public class TitleService : BaseService<Title, TitleDTO,TitleFilter, Guid>, ITitleService
+    public class TitleService : BaseService<Title, TitleDTO,TitleFilter>, ITitleService
     {
         public TitleService(ITitleRepository baseRepository, IMapper mapper, IMemoryCache memoryCache, IPermisionService permisionService) : base(baseRepository, mapper, memoryCache, permisionService)
         {

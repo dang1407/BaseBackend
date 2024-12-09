@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Domain
 {
-    public interface ITitleRepository : IBaseRepository<Title, TitleFilter, Guid>
+    public interface ITitleRepository : IBaseRepository<Title, TitleFilter>
     {
     }
 }

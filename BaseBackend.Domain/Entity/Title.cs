@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Domain
 {
-    public class Title : BaseEntity, IEntity<Guid>
+    public class Title : BaseEntity
     {
         public Title() : base("Title", "TitleId", true, true)
         {
         }
 
         [PropertyEntity("TitleId")]
-        public Guid TitleId { get; set; }
+        public int TitleId { get; set; }
         [PropertyEntity("TitleName")]
         public string TitleName { get; set; } = string.Empty;
         [PropertyEntity("DepartmentId")]
@@ -21,17 +21,29 @@ namespace BaseBackend.Domain
         [PropertyEntity("Version")]
         public int Version { get; set; }
         [PropertyEntity("Deleted")]
+        public bool Deleted { get; set; }    
         #region Extend Member
         public string DepartmentName { get; set; } = string.Empty;
         #endregion
-        public Guid GetId()
+
+        public override int GetId()
         {
             return TitleId;
         }
 
-        public void SetId(Guid id)
+        public override void SetDeleted(bool isDeleted)
+        {
+            Deleted = isDeleted;
+        }
+
+        public override void SetId(int id)
         {
             TitleId = id;
+        }
+
+        public override void SetVersion(int version)
+        {
+            Version = version;
         }
     }
 }

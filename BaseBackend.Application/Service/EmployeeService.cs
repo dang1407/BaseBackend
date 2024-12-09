@@ -3,7 +3,6 @@ using BaseBackend.Application.IService;
 using BaseBackend.Domain;
 using BaseBackend.Domain.Constant;
 using BaseBackend.Domain.Filter;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.VisualBasic;
 using System;
@@ -15,7 +14,7 @@ using System.Transactions;
 
 namespace BaseBackend.Application
 {
-    public class EmployeeService : BaseService<Employee, EmployeeDTO, EmployeeFilter, Guid>, IEmployeeService
+    public class EmployeeService : BaseService<Employee, EmployeeDTO, EmployeeFilter>, IEmployeeService
     {
         private readonly IEmployeeRepository _repository;
         public EmployeeService(IEmployeeRepository baseRepository, IMapper mapper, IMemoryCache memoryCache, IPermisionService permisionService) : base(baseRepository, mapper, memoryCache, permisionService)

@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BaseBackend.Controllers
 {
     //[Authorize]
-    public class TitleController : BaseController<TitleDTO, TitleFilter, Guid>
+    public class TitleController : BaseController<TitleDTO, TitleFilter>
     {
         public TitleController(ITitleService baseService) : base(baseService, 2)
         {

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Infrastructure
 {
-    public class TitleRepository : BaseRepository<Title, TitleFilter, Guid>, ITitleRepository
+    public class TitleRepository : BaseRepository<Title, TitleFilter>, ITitleRepository
     {
         public TitleRepository(IUnitOfWork uow) : base(uow)
         {

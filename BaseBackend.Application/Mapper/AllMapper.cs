@@ -18,6 +18,8 @@ namespace BaseBackend.Application
             CreateMap<Title, TitleDTO>();
             CreateMap<Account, AccountDTO>();   
             CreateMap<AccountDTO, Account>();
+            CreateMap<CustomerT24, CustomerT24DTO>();
+            CreateMap<CustomerT24DTO, CustomerT24>();
         }
     }
 }

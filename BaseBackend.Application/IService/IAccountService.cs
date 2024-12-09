@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Application
 {
-    public interface IAccountService : IBaseService<AccountDTO, AccountFilter, Guid>
+    public interface IAccountService : IBaseService<AccountDTO, AccountFilter>
     {
     }
 }

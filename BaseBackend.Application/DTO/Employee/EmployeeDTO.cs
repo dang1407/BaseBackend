@@ -9,7 +9,7 @@ namespace BaseBackend.Application
 {
     public class EmployeeDTO : BaseDTO
     {
-        public Guid EmployeeId { get; set; }
+        public int EmployeeId { get; set; }
         public string? EmployeeCode { get; set; }
 
         public string? FullName { get; set; }

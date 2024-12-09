@@ -8,16 +8,16 @@ using AutoMapper;
 using BaseBackend.Domain.Constant;
 using System.Net.Http;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.AspNetCore.Http;
+using static Dapper.SqlMapper;
 
 namespace BaseBackend.Application
 {
-    public class BaseService<TEntity, TDTO, TFilter, TIdKey> : BaseReadOnlyService<TEntity, TDTO, TFilter, TIdKey>, IBaseService<TDTO, TFilter, TIdKey> where TEntity : BaseEntity, IEntity<TIdKey> where TFilter : BaseFilter where TIdKey : struct
+    public class BaseService<TEntity, TDTO, TFilter> : BaseReadOnlyService<TEntity, TDTO, TFilter>, IBaseService<TDTO, TFilter> where TEntity : BaseEntity where TFilter : BaseFilter where TDTO : BaseDTO
     {
         private readonly Type _type = typeof(TEntity);
         private BaseEntity _entity;
         private readonly IMemoryCache _memoryCache;
-        protected BaseService(IBaseRepository<TEntity, TFilter, TIdKey> baseRepository, IMapper mapper, IMemoryCache memoryCache, IPermisionService permisionService) : base(baseRepository, mapper, permisionService)
+        protected BaseService(IBaseRepository<TEntity, TFilter> baseRepository, IMapper mapper, IMemoryCache memoryCache, IPermisionService permisionService) : base(baseRepository, mapper, permisionService)
         {
             _memoryCache = memoryCache;
             if (Activator.CreateInstance(_type) is BaseEntity entity)
@@ -48,10 +48,8 @@ namespace BaseBackend.Application
             // Map các trường của Base Enity
             if(entity is BaseEntity baseEntity)
             {
-                baseEntity.CreatedDate ??= DateTime.Now;
-                baseEntity.CreatedBy ??= cachedUserInfo.AccountId;
-                baseEntity.ModifiedDate ??= DateTime.Now;
-                baseEntity.ModifiedBy ??= cachedUserInfo.AccountId;
+                baseEntity.CreatedDate = DateTime.Now;
+                baseEntity.CreatedBy = cachedUserInfo.AccountId;
             }
 
             await ValidateCreateBusinessAsync(entity);
@@ -76,19 +74,19 @@ namespace BaseBackend.Application
                 //e.SetId(Guid.NewGuid());
                 e.CreatedDate = DateTime.Now;
                 
-                }); 
-            // Lọc ra các Id
-            var listIds = listEntities.Select(entity => entity.GetId()).ToList();
-
-            //Tìm các Entity đã tồn tại
-            var existEntities = await BaseRepository.GetByListIdAsync(listIds);
-            // Lọc ra Id của các Entity đã tồn tại
-            var existEntitiesId = existEntities.Select( entity => entity.GetId()).ToList();
-            // Lọc ra các Entity mới để gọi hàm Create
-            var newEntitiesToCreate = listEntities.Where(entity => !existEntitiesId.Contains(entity.GetId())).ToList();
-            var listResultEntities = await BaseRepository.InsertManyAsync(newEntitiesToCreate);
-            var results = listResultEntities.Select(entity =>  MapEntityToDTO(entity)).ToList(); 
-            return results.Count;
+                });
+            //// Lọc ra các Id
+            //List<int> listIds = listEntities.Select(entity => (int)entity.GetType().GetProperty(entity.IdColumnName).GetValue(entity, null)).ToList();
+            ////Tìm các Entity đã tồn tại
+            //var existEntities = await BaseRepository.GetByListIdAsync(listIds);
+            //// Lọc ra Id của các Entity đã tồn tại
+            //var existEntitiesId = existEntities.Select(entity => (int)entity.GetType().GetProperty(entity.IdColumnName).GetValue(entity, null)).ToList();
+            //// Lọc ra các Entity mới để gọi hàm Create
+            //var newEntitiesToCreate = listEntities.Where(entity => !existEntitiesId.Contains((int)entity.GetType().GetProperty(entity.IdColumnName).GetValue(entity, null))).ToList();
+            //var listResultEntities = await BaseRepository.InsertManyAsync(newEntitiesToCreate);
+            //var results = listResultEntities.Select(entity => MapEntityToDTO(entity)).ToList();
+            //return results.Count;
+            return -1;
         }
 
         /// <summary>
@@ -97,17 +95,18 @@ namespace BaseBackend.Application
         /// <param name="entity">Instance của Entity</param>
         /// <returns>Thông tin của Entity sau khi đã thay đổi</returns>
         /// Created by: nkmdang (20/09/2023)
-        public async Task<int> UpdateAsync(TIdKey id, TDTO updateDTO, CachedUserInfo cachedUserInfo)
+        public async Task<int> UpdateAsync(int id, TDTO updateDTO, CachedUserInfo cachedUserInfo)
         {
             var entity = await BaseRepository.GetByIdAsync(id);
+            updateDTO.ModifiedDate = DateTime.Now;
+            updateDTO.ModifiedBy = cachedUserInfo.AccountId;
 
-            
             // Map các trường của Base Enity
-            if (entity is BaseEntity baseEntity)
-            {
-                baseEntity.ModifiedDate ??= DateTime.Now;
-                baseEntity.ModifiedBy ??= cachedUserInfo.AccountId;
-            }
+            //if (entity is BaseEntity baseEntity)
+            //{
+            //    baseEntity.ModifiedDate = DateTime.Now;
+            //    baseEntity.ModifiedBy = cachedUserInfo.AccountId;
+            //}
             var newEntity = MapUpdateDTOToEntity(updateDTO, entity);
             //if (newEntity.GetId<Guid>() == Guid.Empty)
             //{
@@ -133,7 +132,7 @@ namespace BaseBackend.Application
         /// <param name="id">Định danh Entity</param>
         /// <returns>Số bản ghi đã xóa</returns>
         /// Created by: nkmdang (20/09/2023)
-        public async Task<int> DeleteAsync(TIdKey id, CachedUserInfo cachedUserInfo)
+        public async Task<int> DeleteAsync(int id, CachedUserInfo cachedUserInfo)
         {
             TEntity? existItem = await BaseRepository.FindByIdAsync(id);
             if (existItem == null) 
@@ -156,7 +155,7 @@ namespace BaseBackend.Application
         /// <param name="ids">Danh sách các dịnh danh Entity</param>
         /// <returns>Số bản ghi đã xóa</returns>
         /// Created by: nkmdang (20/09/2023)
-        public async Task<int> DeleteManyAsync(List<TIdKey> ids, CachedUserInfo cachedUserInfo)
+        public async Task<int> DeleteManyAsync(List<int> ids, CachedUserInfo cachedUserInfo)
         {
             var entities = await BaseRepository.GetByListIdAsync(ids);
             int result;
@@ -180,7 +179,8 @@ namespace BaseBackend.Application
         /// Created by: nkmdang (19/09/2023)
         public virtual async Task ValidateCreateBusinessAsync(TEntity entity) 
         {
-            var existEntity = await BaseRepository.FindByIdAsync(entity.GetId());
+            var id = (int) entity.GetType().GetProperty(entity.IdColumnName).GetValue(entity, null);
+            var existEntity = await BaseRepository.FindByIdAsync(id);
             if (existEntity != null)
             {
                 throw new ConflictException("Tài nguyên đã tồn tại");

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Application
 {
-    public interface ITitleService : IBaseService<TitleDTO, TitleFilter, Guid>
+    public interface ITitleService : IBaseService<TitleDTO, TitleFilter>
     {
     }
 }

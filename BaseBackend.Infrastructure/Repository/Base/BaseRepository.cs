@@ -10,7 +10,7 @@ using System.Transactions;
 
 namespace BaseBackend.Infrastructure
 {
-    public abstract class BaseRepository<TEntity, TFilter, TIdKey> : IBaseRepository<TEntity, TFilter, TIdKey> where TEntity : BaseEntity, IEntity<TIdKey> where TFilter : BaseFilter
+    public abstract class BaseRepository<TEntity, TFilter> : IBaseRepository<TEntity, TFilter> where TEntity : BaseEntity where TFilter : BaseFilter
     {
         private readonly Type _type = typeof(TEntity);
         private BaseEntity _entity;
@@ -39,7 +39,7 @@ namespace BaseBackend.Infrastructure
         /// <param name="id">Định danh của Entity (Guid)</param>
         /// <returns>Thông tin Entity nếu thành công, null nếu thất bại</returns>
         /// Created by: nkmdang (19/09/2023)
-        public async Task<TEntity?> FindByIdAsync(TIdKey id)
+        public async Task<TEntity?> FindByIdAsync(int id)
         {
             // Lấy ra TableName và IdColumnName từ BaseEntity
             var tableName = _entity.TableName;
@@ -79,7 +79,7 @@ namespace BaseBackend.Infrastructure
         /// <param name="id">Định danh của Entity (Guid)</param>
         /// <returns>Thông tin Entity nếu thành công, null nếu thất bại</returns>
         /// Created by: nkmdang (19/09/2023)
-        public virtual async Task<TEntity> GetByIdAsync(TIdKey id)
+        public virtual async Task<TEntity> GetByIdAsync(int id)
         {
             var entity = await FindByIdAsync(id);
             if (entity != null)
@@ -96,7 +96,7 @@ namespace BaseBackend.Infrastructure
         /// <param name="ids">Định danh của các Entity (Guid)</param>
         /// <returns>Thông tin các Entity nếu thành công, null nếu thất bại</returns>
         /// Created by: nkmdang (20/09/2023)
-        public async Task<List<TEntity>> GetByListIdAsync(List<TIdKey> ids) 
+        public async Task<List<TEntity>> GetByListIdAsync(List<int> ids) 
         {
 
             // Lấy ra TableName và IdColumnName từ BaseEntity
@@ -123,7 +123,18 @@ namespace BaseBackend.Infrastructure
         /// Created by: nkmdang (20/09/2023)
         public virtual async Task<TEntity> InsertAsync(TEntity entity)
         {
+            var baseEntity = (BaseEntity)entity;
             var tableName = (entity as BaseEntity)?.TableName;
+
+            if (baseEntity.HasVersion)
+            {
+                entity.SetVersion(1);
+            }
+
+            if (baseEntity.HasDeleted)
+            {
+                entity.SetDeleted(false);
+            }
 
             var columns = _propertyInfo.Select(p => p.GetCustomAttribute<PropertyEntity>()?.ColumnName).ToList();
             var values = _propertyInfo.Select(p => $"@{p.Name}").ToList();
@@ -131,15 +142,17 @@ namespace BaseBackend.Infrastructure
             string columnString = string.Join(", ", columns);
             string valueString = string.Join(", ", values);
 
-            string query = $"INSERT INTO {_entity.TableName} ({columnString}) VALUES ({valueString});";
+
+            string query = $"INSERT INTO {_entity.TableName} ({columnString}) VALUES ({valueString}); \r\nSELECT LAST_INSERT_ID();";
             var param = new DynamicParameters();
             foreach (var property in _propertyInfo)
             {
                 param.Add($"@{property.Name}", property.GetValue(entity));
             }
             // Thực thi truy vấn
-            var result = await Uow.Connection.QuerySingleOrDefaultAsync<TEntity>(query, param, transaction: Uow.Transaction);
-                return entity;
+            var id = await Uow.Connection.ExecuteScalarAsync<int>(query, param, transaction: Uow.Transaction);
+            (entity as BaseEntity).SetId(id); // Gán ID vào entity
+            return entity;
         }
 
         /// <summary>
@@ -164,7 +177,7 @@ namespace BaseBackend.Infrastructure
             foreach (var entity in entities)
             {
                 // Prepare value placeholders for each entity
-                var valuePlaceholders = _propertyInfo.Select(p => $"@{p.Name}{index}").ToList();
+                var valuePlaceholders = _propertyInfo.Where(p => !string.IsNullOrWhiteSpace(p.GetCustomAttribute<PropertyEntity>()?.ColumnName)).Select(p => $"@{p.Name}{index}").ToList();
                 valuesList.Add($"({string.Join(", ", valuePlaceholders)})");
 
                 // Add parameters for the current entity
@@ -193,15 +206,16 @@ namespace BaseBackend.Infrastructure
         /// Created by: nkmdang (20/09/2023)
         public virtual async Task<TEntity> UpdateAsync(TEntity entity)
         {
+            var baseEntity = (entity as BaseEntity);
             // Lấy tên bảng
-            var tableName = (entity as BaseEntity)?.TableName;
+            var tableName = baseEntity?.TableName;
 
             var idValue = entity.GetId();
             
 
             // Lấy danh sách các cột cần update, trừ Id và Version
             var columns = _propertyInfo
-                .Where(p => p.Name != "Id" && p.Name != "Version")
+                .Where(p => p.Name != baseEntity?.IdColumnName && p.Name != "Version")
                 .Select(p => $"{p.GetCustomAttribute<PropertyEntity>()?.ColumnName} = @{p.Name}")
                 .ToList();
 
@@ -211,7 +225,7 @@ namespace BaseBackend.Infrastructure
             string query = $@"
         UPDATE {tableName}
         SET {setClause}, Version = Version + 1
-        WHERE Id = @Id ";
+        WHERE {baseEntity?.IdColumnName} = @Id ";
             if (entity.HasVersion)
             {
                 query += " \n AND Version = @Version";
@@ -246,7 +260,7 @@ namespace BaseBackend.Infrastructure
         /// <param name="id">Định danh Entity</param>
         /// <returns>Số bản ghi đã xóa</returns>
         /// Created by: nkmdang (20/09/2023)
-        public async Task<int> DeleteAsync(TIdKey id)
+        public async Task<int> DeleteAsync(int id)
         {
             // Tạo câu lệnh query
             if (Activator.CreateInstance(_type) is BaseEntity _entity)
@@ -266,7 +280,7 @@ namespace BaseBackend.Infrastructure
         /// <param name="ids">Danh sách các dịnh danh Entity</param>
         /// <returns>Số bản ghi đã xóa</returns>
         /// Created by: nkmdang (20/09/2023)
-        public async Task<int> DeleteManyAsync(List<TIdKey> ids)
+        public async Task<int> DeleteManyAsync(List<int> ids)
         {
             // Tạo câu lệnh query
             string query = $"DELETE FROM {_entity.TableName} WHERE {_entity.IdColumnName} IN @IDS";
@@ -277,7 +291,7 @@ namespace BaseBackend.Infrastructure
             return result;
         }
 
-        public async Task<int> SoftDeleteAsync(TIdKey id)
+        public async Task<int> SoftDeleteAsync(int id)
         {
             string query = $@"UPDATE {_entity.TableName} SET DELETED = {SharedResource.IsDeleted} WHERE {_entity.IdColumnName} = @Id";
             var param = new DynamicParameters();
@@ -285,7 +299,7 @@ namespace BaseBackend.Infrastructure
             int affectRow = await Uow.Connection.ExecuteAsync(query, transaction: Uow.Transaction);
             return affectRow;
         }
-        public async Task<int> SoftDeleteManyAsync(List<TIdKey> ids)
+        public async Task<int> SoftDeleteManyAsync(List<int> ids)
         {
             string query = $@"UPDATE {_entity.TableName} SET DELETED = {SharedResource.IsDeleted} WHERE {_entity.IdColumnName} IN @Id";
             var param = new DynamicParameters();
@@ -382,7 +396,7 @@ namespace BaseBackend.Infrastructure
             // Lấy tên bảng
             var tableName = (entity as BaseEntity)?.TableName;
 
-            var idValue = entity.GetId();
+            var idValue = entity.GetType().GetProperty(entity.IdColumnName).GetValue(entity, null);
 
 
             // Lấy danh sách các cột cần update, trừ Id và Version
@@ -430,7 +444,7 @@ namespace BaseBackend.Infrastructure
             }
         }
 
-        public int SoftDelete(TIdKey id)
+        public int SoftDelete(int id)
         {
             string query = $@"UPDATE {_entity.TableName} SET DELETED = {SharedResource.IsDeleted} WHERE {_entity.IdColumnName} = @Id";
             var param = new DynamicParameters();
@@ -439,17 +453,17 @@ namespace BaseBackend.Infrastructure
             return affectRow;
         }
 
-        public int DeleteById(TIdKey id)
+        public int DeleteById(int id)
         {
             throw new NotImplementedException();
         }
 
-        public int DeleteManyByIds(List<TIdKey> ids)
+        public int DeleteManyByIds(List<int> ids)
         {
             throw new NotImplementedException();
         }
 
-        public int SoftDeleteMany(List<TIdKey> ids)
+        public int SoftDeleteMany(List<int> ids)
         {
             string query = $@"UPDATE {_entity.TableName} SET DELETED = {SharedResource.IsDeleted} WHERE {_entity.IdColumnName} IN @Id";
             var param = new DynamicParameters();

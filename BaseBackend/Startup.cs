@@ -55,6 +55,8 @@ namespace BaseBackend
             services.AddScoped<IPermisionService, PermisionService>();
             services.AddScoped<IAdmFeatureFunctionRepository, AdmFeatureFunctionRepository>();
             services.AddScoped<IAdmFeatureFunctionService, AdmFeatureFunctionService>();
+            services.AddScoped<ICustomerT24Repository, CustomerT24Repository>();
+            services.AddScoped<ICustomerT24Service, CustomerT24Service>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             // AutoMapper

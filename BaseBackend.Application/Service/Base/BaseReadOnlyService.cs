@@ -8,12 +8,12 @@ using AutoMapper;
 
 namespace BaseBackend.Application
 {
-    public abstract class BaseReadOnlyService<TEntity, TDTO, TFilter, TIdKey> : IBaseReadOnlyService<TDTO, TFilter, TIdKey> where TFilter : BaseFilter where TEntity : BaseEntity, IEntity<TIdKey>
+    public abstract class BaseReadOnlyService<TEntity, TDTO, TFilter> : IBaseReadOnlyService<TDTO, TFilter> where TFilter : BaseFilter where TEntity : BaseEntity
     {
-        protected readonly IBaseRepository<TEntity, TFilter, TIdKey> BaseRepository;
+        protected readonly IBaseRepository<TEntity, TFilter> BaseRepository;
         protected readonly IMapper Mapper;
         protected readonly IPermisionService PermisionService;
-        protected BaseReadOnlyService(IBaseRepository<TEntity, TFilter, TIdKey> baseRepository, IMapper mapper, IPermisionService permisionService)
+        protected BaseReadOnlyService(IBaseRepository<TEntity, TFilter> baseRepository, IMapper mapper, IPermisionService permisionService)
         {
             BaseRepository = baseRepository;
             Mapper = mapper;
@@ -35,7 +35,7 @@ namespace BaseBackend.Application
         /// <param name="id">Định danh của Entity (Guid)</param>
         /// <returns>Thông tin Entity nếu thành công, null nếu thất bại</returns>
         /// Created by: nkmdang (20/09/2023)
-        public virtual async Task<TDTO> FindByIdAsync(TIdKey id)
+        public virtual async Task<TDTO> FindByIdAsync(int id)
         {
             var entity = await BaseRepository.FindByIdAsync(id);
             var result = MapEntityToDTO(entity);
@@ -48,7 +48,7 @@ namespace BaseBackend.Application
         /// <param name="id">Định danh của Entity (Guid)</param>
         /// <returns>Thông tin Entity nếu thành công, null nếu thất bại</returns>
         /// Created by: nkmdang (20/09/2023)
-        public virtual async Task<TDTO> GetByIdAsync(TIdKey id)
+        public virtual async Task<TDTO> GetByIdAsync(int id)
         {
             var entity = await BaseRepository.GetByIdAsync(id);
             var result = MapEntityToDTO(entity);

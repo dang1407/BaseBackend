@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace BaseBackend.Application
 {
-    public class AdmFeatureFunctionService : BaseService<AdmFeatureFunction, AdmFeatureFunctionDTO, AdmFeatureFunctionFilter, int>, IAdmFeatureFunctionService
+    public class AdmFeatureFunctionService : BaseService<AdmFeatureFunction, AdmFeatureFunctionDTO, AdmFeatureFunctionFilter>, IAdmFeatureFunctionService
     {
         public AdmFeatureFunctionService(IAdmFeatureFunctionRepository repository, IMapper mapper, IMemoryCache memoryCache, IPermisionService permisionService) : base(repository, mapper, memoryCache, permisionService) { }
     }
