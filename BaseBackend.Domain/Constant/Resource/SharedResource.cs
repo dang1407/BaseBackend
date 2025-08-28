@@ -2,19 +2,26 @@
 {
     public static class SharedResource
     {
-        public readonly static int IsNotDeleteInt = 0;
-        public readonly static int IsDeletedInt = 1;
-        public readonly static bool IsNotDeleteBool = false;
-        public readonly static bool IsDeletedBool = true;
-        public readonly static int DefaultPageSize = 20;
-        public readonly static int FirstVersion = 1;
+        public const int IsNotDeleteInt = 0;
+        public const int IsDeletedInt = 1;
+        public const bool IsNotDeleteBool = false;
+        public const bool IsDeletedBool = true;
+        public const int DefaultPageSize = 20;
+        public const int FirstVersion = 1;
+        public const int GlobalConfig = 9999;
         #region Error Message
-        public readonly static string ItemNotFoundMessage = "Không tìm thấy thông tin trong hệ thống";
-        public readonly static string ItemHasBeenChanged = "Dữ liệu đã bị thay đổi. Vui lòng tải lại trang!";
-        public readonly static string InsertErrorMessage = "Lỗi khi thêm mới bản ghi";
-        public readonly static string ExecuteErrorMessage = "Lỗi thi thực hiện thao tác";
-        public readonly static string LoginFailed = "Đăng nhập không thành công";
-        public readonly static string InputDataInvalid = "Dữ liệu đầu vào không hợp lệ";
+        public const string ItemNotFoundMessage = "Không tìm thấy thông tin trong hệ thống";
+        public const string ItemHasBeenChanged = "Dữ liệu đã bị thay đổi. Vui lòng tải lại trang!";
+        public const string InsertErrorMessage = "Lỗi khi thêm mới bản ghi";
+        public const string ExecuteErrorMessage = "Lỗi thi thực hiện thao tác";
+        public const string LoginFailed = "Đăng nhập không thành công";
+        public const string InputDataInvalid = "Dữ liệu đầu vào không hợp lệ";
         #endregion
+
+        public class Status
+        {
+            public const int Active = 1;
+            public const int UnActive = 2;
+        }
     }
 }

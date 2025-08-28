@@ -14,18 +14,18 @@
         }
 
         public const string C_code = "code"; // 
-        private string _code;
+        private string? _code;
         [PropertyEntity(C_code)]
-        public string code
+        public string? code
         {
             get { return _code; }
             set { _code = value; NotifyPropertyChanged(C_code); }
         }
 
         public const string C_name = "name"; // 
-        private string _name;
+        private string? _name;
         [PropertyEntity(C_name)]
-        public string name
+        public string? name
         {
             get { return _name; }
             set { _name = value; NotifyPropertyChanged(C_name); }
@@ -37,7 +37,7 @@
         #endregion
 
         #region Extend members
-
+        public int? feature_function_rule_id { get; set; }
         #endregion
 
         #region Clone

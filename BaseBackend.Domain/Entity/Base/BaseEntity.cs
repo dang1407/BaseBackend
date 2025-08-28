@@ -32,6 +32,11 @@ namespace BaseBackend.Domain
             return _tableName;
         }
 
+        public bool GetHasDeleted()
+        {
+            return _hasDeleted;
+        }
+
         public string GetPrimaryKeyColumnName()
         {
             return _primaryKeyColumnName;

@@ -11,7 +11,7 @@ namespace BaseBackend.Controllers
         [Route("UserMenu")]
         public IActionResult GetNavMenuData()
         {
-            UserProfile profile = UserContext.Current;
+            UserProfile profile = UserContext.CurrentUser;
 
                 List<adm_feature> listFeature = profile.ListRight?.Select(en => new adm_feature()
                 {

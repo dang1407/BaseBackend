@@ -4,7 +4,7 @@
     {
         private static readonly AsyncLocal<UserProfile> _currentUser = new AsyncLocal<UserProfile>();
 
-        public static UserProfile Current
+        public static UserProfile CurrentUser
         {
             get => _currentUser.Value ?? throw new InvalidOperationException("User context not initialized");
             set => _currentUser.Value = value;
