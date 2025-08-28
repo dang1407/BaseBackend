@@ -1,13 +1,9 @@
-﻿using BaseBackend.Application.Cache;
-using BaseBackend.Domain;
+﻿using BaseBackend.Domain;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text;
-using System.Text.Json.Serialization;
 
 namespace BaseBackend.Application
 {

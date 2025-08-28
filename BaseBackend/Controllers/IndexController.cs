@@ -17,7 +17,7 @@ namespace BaseBackend.Controllers
         {
             return Ok(new
             {
-                ScheduleAdmobMinute = 20
+                a = ConfigUtils.GetAppSettingConfig("EmailAddress")
             });
         }
 

@@ -38,7 +38,7 @@ namespace BaseBackend.Middleware
                     ProfileCacheManager.AddOrUpdateUser(cachedUser);
                 }
                 // Gán profile vào UserContext để gọi ở bất cứ đâu
-                UserContext.Current = cachedUser;
+                UserContext.CurrentUser = cachedUser;
             }
 
             await _next(context);

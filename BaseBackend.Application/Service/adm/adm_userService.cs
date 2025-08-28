@@ -28,16 +28,20 @@ namespace BaseBackend.Application
             if(string.IsNullOrWhiteSpace(user.username) || string.IsNullOrWhiteSpace(user.password)) {
                 throw new ExecuteErrorException(SharedResource.InputDataInvalid);
             }
-            user.created_by = CurrentUserContext.CurrentUser.username;
+            user.created_by = UserContext.CurrentUser.UserId;
             user.created_time = DateTime.Now;
-            userRepository.InsertItem(user);
+            user.deleted = SharedResource.IsNotDeleteInt;
+            user.version = SharedResource.FirstVersion;
+            using UnitOfWork unitOfWork = new UnitOfWork();
+            userRepository.InsertItem(user, unitOfWork);
         }
 
         public void UpdateUser(adm_user user) 
         {
             user.updated_time = DateTime.Now;
-            user.updated_by = CurrentUserContext.CurrentUser.username;  
-            int affectedRows = userRepository.UpdateItem(user);
+            user.updated_by = UserContext.CurrentUser.UserId;
+            using UnitOfWork unitOfWork = new UnitOfWork();
+            int affectedRows = userRepository.UpdateItem(user, unitOfWork);
             if (affectedRows == 0) throw new ExecuteErrorException(SharedResource.ExecuteErrorMessage);
         }
 

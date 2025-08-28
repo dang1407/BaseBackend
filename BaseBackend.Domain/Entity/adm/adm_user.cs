@@ -167,9 +167,9 @@
         }
 
         public const string C_created_by = "created_by"; // 
-        private string? _created_by;
+        private int? _created_by;
         [PropertyEntity(C_created_by)]
-        public string? created_by
+        public int? created_by
         {
             get { return _created_by; }
             set { _created_by = value; NotifyPropertyChanged(C_created_by); }
@@ -185,9 +185,9 @@
         }
 
         public const string C_updated_by = "updated_by"; // 
-        private string? _updated_by;
+        private int? _updated_by;
         [PropertyEntity(C_updated_by)]
-        public string? updated_by
+        public int? updated_by
         {
             get { return _updated_by; }
             set { _updated_by = value; NotifyPropertyChanged(C_updated_by); }

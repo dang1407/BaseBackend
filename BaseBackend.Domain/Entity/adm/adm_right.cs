@@ -85,4 +85,11 @@
         #endregion
     }
 
+    public class BuildRightConfig
+    {
+        public int? ItemId { get; set; }
+        public string? Name { get; set; }
+        public List<int?>? FunctionIds { get; set; }
+        public int? RuleId { get; set; }
+    }
 }
