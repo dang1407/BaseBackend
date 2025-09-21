@@ -6,7 +6,8 @@
     "iisExpress": {
       "applicationUrl": "http://localhost:7016",
       "sslPort": 44390
-    }
+    },
+    "use64Bit": true
   },
   "profiles": {
     "http": {
@@ -14,7 +15,7 @@
       "dotnetRunMessages": true,
       "launchBrowser": true,
       "launchUrl": "swagger",
-      "applicationUrl": "http://localhost:5138",
+      "applicationUrl": "http://localhost:1472",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
@@ -24,7 +25,7 @@
       "dotnetRunMessages": true,
       "launchBrowser": true,
       "launchUrl": "swagger",
-      "applicationUrl": "https://localhost:7241;http://localhost:5138",
+      "applicationUrl": "https://localhost:7241;http://localhost:1472",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

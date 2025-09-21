@@ -262,6 +262,15 @@ namespace BaseBackend.Infrastructure
                 return string.Join(", ", lstValue.ToArray());
             }
         }
+
+        protected string? BuildLikeFilter(string? value)
+        {
+            if (!string.IsNullOrEmpty(value))
+            {
+                return string.Format("%{0}%", value);
+            }
+            else return null;
+        }
         #endregion
     }
 }

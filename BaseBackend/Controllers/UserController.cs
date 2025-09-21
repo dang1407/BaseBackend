@@ -39,8 +39,8 @@ namespace BaseBackend.Controllers
         {
             public adm_userFilter Filter { get; set; } = new adm_userFilter();
             public PagingInfo PagingInfo { get; set; } = new PagingInfo();
-            public List<adm_user> adm_users { get; set; }
-            public adm_user adm_user { get; set; }
+            public List<adm_user>? adm_users { get; set; }
+            public adm_user? adm_user { get; set; }
         }
 
         public class ApiActionCode : BaseApiActionCode

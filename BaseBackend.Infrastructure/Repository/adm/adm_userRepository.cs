@@ -26,6 +26,11 @@ where deleted = @is_not_deleted
                 query += " and username = @username ";
             }
 
+            if (!string.IsNullOrWhiteSpace(filter.name))
+            {
+                query += " and name like @name";
+            }
+
             if (filter.dob_from.HasValue)
             {
                 query += " and dob >= @dob_from";
@@ -34,6 +39,7 @@ where deleted = @is_not_deleted
             DynamicParameters param = new DynamicParameters();
             // Filter
             param.Add("@username", filter.username);
+            param.Add("@name", BuildLikeFilter(filter.name));
             param.Add("@dob_from", filter.dob_from);
             // Hệ thống
             param.Add("@offset", pagingInfo.PageIndex * pagingInfo.PageSize);
@@ -81,7 +87,7 @@ where rol.deleted = 0
         public List<FunctionRight> GetRightsOfEmployee(int userId, List<int> lstRole)
         {
             string cmdText = string.Format(@"
-select fea.feature_id as featureid, fuc.function_id as functionid, fuc.code as functioncode, ff.rule_id as ruleid, ff.url as url
+select fea.feature_id, fuc.function_id, fuc.code as function_code, ff.rule_id, ff.url as url
 from adm_user emp
 inner join adm_right rig on rig.user_id = emp.user_id
 inner join adm_feature_function ff on ff.feature_id = rig.feature_id 
@@ -94,7 +100,7 @@ where emp.deleted = 0
 
 union
 
-select fea.feature_id as featureid, fuc.function_id as functionid, fuc.code as functioncode, ff.rule_id as ruleid, ff.url as url
+select fea.feature_id, fuc.function_id, fuc.code as function_code, ff.rule_id, ff.url as url
 from adm_role rol
 inner join adm_right rig on rig.role_id = rol.role_id
 inner join adm_feature_function ff on ff.feature_id = rig.feature_id 

@@ -95,6 +95,18 @@ where feature_id = @feature_id";
             return result.ToList();
         }
 
+        public List<adm_feature> GetFeaturesByListFeatureIDs(List<int> listFeatureIDs)
+        {
+            string query = string.Format(@"
+select *
+from adm_feature 
+where feature_id in ({0})
+", BuildInCondition(listFeatureIDs));
+            using UnitOfWork unitOfWork = new UnitOfWork();
+            var result = unitOfWork.Connection.Query<adm_feature>(query);
+            return result.ToList();
+        }
+
         public int DeleteRightByFeatureID(int? featureID, UnitOfWork unitOfWork)
         {
             string query = @"

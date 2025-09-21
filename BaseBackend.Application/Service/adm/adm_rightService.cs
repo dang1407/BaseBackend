@@ -82,5 +82,10 @@ namespace BaseBackend.Application.Service.adm
                 throw new ExecuteErrorException(ex.Message);
             }
         }
+
+        public List<adm_feature> GetUserFeature(List<int> listFeatureIDs)
+        {
+            return _dao.GetFeaturesByListFeatureIDs(listFeatureIDs);
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using BaseBackend.CacheManager;
+﻿using BaseBackend.Application.Service.adm;
+using BaseBackend.CacheManager;
 using BaseBackend.Domain;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,19 +13,14 @@ namespace BaseBackend.Controllers
         public IActionResult GetNavMenuData()
         {
             UserProfile profile = UserContext.CurrentUser;
+            List<int>? lstFeatureID = profile.ListRight?.Where(r => r.feature_id.HasValue).Select(r => r.feature_id.Value).ToList();
 
-                List<adm_feature> listFeature = profile.ListRight?.Select(en => new adm_feature()
-                {
-                    feature_id = en.feature_id,
-                    parent_id = en.parent_id,
-                    name = en.name,
-                    url = en.url,
-                    icon = en.icon
-                }).ToList() ?? [];
-                return Ok(new
-                {
-                    ListFeature = listFeature
-                });
+            adm_rightService adm_RightService = new adm_rightService();
+            List<adm_feature> result = adm_RightService.GetUserFeature(lstFeatureID ?? []);
+            return Ok(new
+            {
+                ListFeatures = result
+            });
         }
     }
 }
