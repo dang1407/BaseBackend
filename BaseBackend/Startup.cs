@@ -161,7 +161,10 @@ namespace BaseBackend
                 
             }
 
-            app.UseHttpsRedirection();
+            if (!env.IsDevelopment())
+            {
+                app.UseHttpsRedirection();
+            }
 
             app.UseMiddleware<ExceptionMiddleware>();
             app.UseMiddleware<JwtMiddleware>();

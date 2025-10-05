@@ -2,7 +2,7 @@
 using BaseBackend.Domain;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BaseBackend.Controllers
+namespace BaseBackend.Controllers.Admintrations
 {
     public class UserController : BaseController
     {
