@@ -29,6 +29,22 @@ namespace BaseBackend.Controllers
                         _userService.InsertUser(requestDTO.adm_user);
                         break;
                     }
+                case ApiActionCode.SetupDisplay:
+                    {
+                        if (requestDTO.user_id.HasValue)
+                        {
+                            dtoRespone.adm_user = _userService.GetById(requestDTO.user_id.Value);
+                        }
+                        break;
+                    }
+                    case ApiActionCode.SetupUpdateForm:
+                    {
+                        if (requestDTO.user_id.HasValue)
+                        {
+                            dtoRespone.adm_user = _userService.GetById(requestDTO.user_id.Value);
+                        }
+                        break;
+                    }
                 default:
                     throw new NotImplementedException("ActionCode isn't supported.");
             }
@@ -41,6 +57,7 @@ namespace BaseBackend.Controllers
             public PagingInfo PagingInfo { get; set; } = new PagingInfo();
             public List<adm_user>? adm_users { get; set; }
             public adm_user? adm_user { get; set; }
+            public int? user_id { get; set; }
         }
 
         public class ApiActionCode : BaseApiActionCode

@@ -106,6 +106,10 @@ namespace BaseBackend.Infrastructure
             List<string> listUpdateState = [];
             entity.GetListChangeColumn().ForEach(changeColName =>
             {
+                if(string.Compare(changeColName, "version", StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    return;
+                }
                 listUpdateState.Add($"{changeColName} = @{changeColName}");
             });
             if (listUpdateState.Count > 0 && entity.GetHasVersion())
