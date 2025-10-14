@@ -1,17 +1,31 @@
-﻿using BaseBackend.Domain;
+﻿using BaseBackend.Application.Service.Securities;
+using BaseBackend.Common;
+using BaseBackend.Domain;
+using BaseBackend.Domain.Entity.adm;
+using BaseBackend.Infrastructure;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using static BaseBackend.Application.Service.Securities.EncryptionService;
 
 namespace BaseBackend.Application
 {
-    public class AuthenService
+    public class AuthenService: IAuthenService
     {
-        private readonly adm_userService _userService = new adm_userService();
-        public string Login(string userName, string password)
+        private IClientAuthenticateRepository _clientAuthenticateRepository;
+        public AuthenService(IClientAuthenticateRepository clientAuthenticateRepository)
         {
+            _clientAuthenticateRepository = clientAuthenticateRepository;
+        }
+        private readonly adm_userService _userService = new adm_userService();
+        public string Login(string? userName, string? password)
+        {
+            if(string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
+            {
+                throw new InvalidInputException(SharedResource.InputDataInvalid);
+            }
             adm_user? user = _userService.GetUserByUserName(userName);
 
             if(user == null)
@@ -19,7 +33,7 @@ namespace BaseBackend.Application
                 throw new ExecuteErrorException("Tên đăng nhập không tồn tại");
             }
 
-            string encryptPassword = EncryptPassword(password, user.password_salt);
+            string encryptPassword = EncryptPassword(password, user.password_salt!);
             if(string.Compare(encryptPassword, user.password) != 0)
             {
                 throw new ExecuteErrorException(SharedResource.LoginFailed);
@@ -75,6 +89,38 @@ namespace BaseBackend.Application
         private static string GetPasswordSalt()
         {
             return Guid.NewGuid().ToString("N");
+        }
+
+        public async Task<AdmClientAuthenticate> GenerateEncryptData(string path)
+        {
+            if(SafeAPI.WhiteList.Contains(path))
+            {
+                return new AdmClientAuthenticate()
+                {
+                    public_key = "",
+                    private_key = ""
+                };
+            } else
+            {
+                EncryptionService encryptionService = new EncryptionService();
+                RSAKeyPair keyPair = encryptionService.GenerateRSAKeyPair();
+                AdmClientAuthenticate clientAuth = new AdmClientAuthenticate();
+                clientAuth.private_key = keyPair.PrivateKey;
+                clientAuth.public_key = keyPair.PublicKey;
+                clientAuth.requested_dtg = DateTime.Now;
+                try
+                {
+                    await _clientAuthenticateRepository.InsertItem(clientAuth);
+                    AdmClientAuthenticate result = clientAuth.CloneToUpdate();
+                    result.private_key = null;
+                    result.public_key = encryptionService.ExportPublicKeyToPem(clientAuth.public_key);
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    throw new ExecuteErrorException("Lỗi khi lưu khóa mã hóa", ex);
+                }
+            }
         }
     }
 }

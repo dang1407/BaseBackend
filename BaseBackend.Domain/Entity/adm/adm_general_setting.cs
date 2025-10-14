@@ -5,27 +5,27 @@
         #region Primitive members
 
         public const string C_setting_key = "setting_key"; // 
-        private string _setting_key;
+        private string? _setting_key;
         [PropertyEntity(C_setting_key)]
-        public string setting_key
+        public string? setting_key
         {
             get { return _setting_key; }
             set { _setting_key = value; NotifyPropertyChanged(C_setting_key); }
         }
 
         public const string C_setting_value = "setting_value"; // 
-        private string _setting_value;
+        private string? _setting_value;
         [PropertyEntity(C_setting_value)]
-        public string setting_value
+        public string? setting_value
         {
             get { return _setting_value; }
             set { _setting_value = value; NotifyPropertyChanged(C_setting_value); }
         }
 
         public const string C_description = "description"; // 
-        private string _description;
+        private string? _description;
         [PropertyEntity(C_description)]
-        public string description
+        public string? description
         {
             get { return _description; }
             set { _description = value; NotifyPropertyChanged(C_description); }

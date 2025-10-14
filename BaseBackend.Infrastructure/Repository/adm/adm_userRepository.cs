@@ -13,7 +13,7 @@ namespace BaseBackend.Infrastructure
             return findedItem;
         }
 
-        public List<adm_user> GetPaging(adm_userFilter filter, PagingInfo pagingInfo)
+        public List<adm_user> GetPaging(adm_userFilter? filter, PagingInfo pagingInfo)
         {
             string query = @"
 select

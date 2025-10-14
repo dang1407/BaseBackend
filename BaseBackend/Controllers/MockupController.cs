@@ -63,7 +63,7 @@ namespace BaseBackend.Controllers
 
         public static bool UploadFile(byte[] fileContent, string destinationName)
         {
-            string directory = Path.GetDirectoryName(destinationName);
+            string directory = Path.GetDirectoryName(destinationName) ?? "";
             if (Directory.Exists(directory) == false)
             {
                 Directory.CreateDirectory(directory);
@@ -77,7 +77,7 @@ namespace BaseBackend.Controllers
                     writer.Close();
                 }
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return false;
             }
@@ -88,7 +88,7 @@ namespace BaseBackend.Controllers
         public class Form
         {
             public int? process_valuation_id { get; set; }
-            public IFormFile file { get; set; }
+            public IFormFile? file { get; set; }
         }
     }
 }

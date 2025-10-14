@@ -41,9 +41,9 @@
         }
 
         public const string C_url = "url"; // 
-        private string _url;
+        private string? _url;
         [PropertyEntity(C_url, false)]
-        public string url
+        public string? url
         {
             get { return _url; }
             set { _url = value; NotifyPropertyChanged(C_url); }

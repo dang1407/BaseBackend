@@ -14,13 +14,14 @@
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="7.1.2" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.1.2" />
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
   </ItemGroup>
 
   <ItemGroup>
 	  <ProjectReference Include="..\BaseBackend.CacheManager\BaseBackend.CacheManager.csproj" />
+	  <ProjectReference Include="..\BaseBackend.Common\BaseBackend.Common.csproj" />
 	  <ProjectReference Include="..\BaseBackend.Domain\BaseBackend.Domain.csproj" />
 	  <ProjectReference Include="..\BaseBackend.Infrastructure\BaseBackend.Infrastructure.csproj" />
   </ItemGroup>

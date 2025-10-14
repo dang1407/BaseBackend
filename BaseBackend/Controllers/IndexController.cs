@@ -1,5 +1,6 @@
 ﻿using BaseBackend.Application;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 namespace BaseBackend.Controllers
 {
     [Route("api/[controller]")]
@@ -7,9 +8,15 @@ namespace BaseBackend.Controllers
     public class IndexController : ControllerBase
     {
         [HttpGet]
-        public IActionResult GetPagePermisions()
+        public IActionResult GetClientIP()
         {
-            return Ok(GlobalCache.ListPagePermisions);
+            IPAddress? clientIP = HttpContext.Connection.RemoteIpAddress;
+            string ipAddress = "0.0.0.0";
+            if (clientIP != null)
+            {
+                ipAddress = clientIP.ToString();
+            }
+            return Ok(ipAddress);
         }
         [HttpGet]
         [Route("config")]

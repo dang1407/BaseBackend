@@ -13,8 +13,8 @@ namespace BaseBackend.Infrastructure
     /// </summary>
     public sealed class UnitOfWork : IUnitOfWork
     {
-        private DbConnection _connection = null;
-        private DbTransaction _transaction = null;
+        private DbConnection _connection = null!;
+        private DbTransaction _transaction = null!;
 
         private readonly string _connectionString;
 
@@ -87,13 +87,13 @@ namespace BaseBackend.Infrastructure
             if(_transaction != null)
             {
                 _transaction.Dispose();
-                _transaction = null;
+                _transaction = null!;
             }
 
             if(_connection != null)
             {
                 _connection.Dispose();
-                _connection = null;
+                _connection = null!;
             }
         }
 
@@ -102,13 +102,13 @@ namespace BaseBackend.Infrastructure
             if (_transaction != null)
             {
                 await _transaction.DisposeAsync();
-                _transaction = null;
+                _transaction = null!;
             }
 
             if (_connection != null)
             {
                 await _connection.DisposeAsync();
-                _connection = null;
+                _connection = null!;
             }
         }
 

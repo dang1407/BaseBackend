@@ -144,6 +144,8 @@ namespace BaseBackend
                     options.AccessDeniedPath = "/Forbidden/";
                 });
             services.Configure<JwtConfig>(Configuration.GetSection("Jwt"));
+            services.AddScoped<IClientAuthenticateRepository, ClientAuthenticateRepository>();
+            services.AddScoped<IAuthenService, AuthenService>();
             services.AddAuthorization();
             // Cache In-Memory
             services.AddMemoryCache();
@@ -158,16 +160,14 @@ namespace BaseBackend
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI();
-                
             }
 
+            // ở môi trường dev thì không sử dụng HTTPS
             if (!env.IsDevelopment())
             {
                 app.UseHttpsRedirection();
             }
 
-            app.UseMiddleware<ExceptionMiddleware>();
-            app.UseMiddleware<JwtMiddleware>();
             // Sử dụng routing
             app.UseRouting();
 
@@ -178,6 +178,9 @@ namespace BaseBackend
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseMiddleware<ExceptionMiddleware>();
+            app.UseMiddleware<JwtMiddleware>();
+            app.UseMiddleware<DecryptionMiddleware>();
             // Thiết lập endpoint cho API
             app.UseEndpoints(endpoints =>
             {

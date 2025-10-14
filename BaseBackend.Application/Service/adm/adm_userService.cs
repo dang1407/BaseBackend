@@ -12,8 +12,10 @@ namespace BaseBackend.Application
             return userRepository.GetById(id);
         }
 
-        public List<adm_user> GetPaging(adm_userFilter filter, PagingInfo pagingInfo) 
+        public List<adm_user> GetPaging(adm_userFilter? filter, PagingInfo? pagingInfo) 
         {
+            if (pagingInfo == null)
+                pagingInfo = new PagingInfo();
             return userRepository.GetPaging(filter, pagingInfo);   
         }
 

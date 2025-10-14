@@ -1,6 +1,6 @@
 ﻿namespace BaseBackend.Domain
 {
-    public partial class adm_user : BaseEntity
+    public class adm_user : BaseEntity
     {
         #region Primitive members
 

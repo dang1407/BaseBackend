@@ -35,7 +35,7 @@ namespace BaseBackend.Controllers
 
         public class BaseDTO
         {
-            public PagingInfo PagingInfo { get; set; }
+            public PagingInfo? PagingInfo { get; set; }
         }
 
         public class BaseApiActionCode

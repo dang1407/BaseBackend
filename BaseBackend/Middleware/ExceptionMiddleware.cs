@@ -46,7 +46,7 @@ namespace BaseBackend.Middleware
                         ErrorCode = baseException.ErrorCode,
                         UserMessage = baseException.UserMessage,
 #if DEBUG
-                        DevMessage = baseException.Message,
+                        DevMessage = baseException.DevMessage ?? baseException.Message,
 #else
                         DevMessage = "",
 #endif

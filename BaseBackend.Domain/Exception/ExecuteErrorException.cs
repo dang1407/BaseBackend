@@ -13,5 +13,11 @@ namespace BaseBackend.Domain
             UserMessage = message;
             DevMessage = message;
         }
+
+        public ExecuteErrorException(string userMessage, Exception ex)
+        {
+            UserMessage = userMessage;
+            DevMessage = ex.Message;
+        }
     }
 }

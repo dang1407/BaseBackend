@@ -17,10 +17,11 @@ namespace BaseBackend.Controllers
     {
         public IConfiguration _configuration;
         private readonly adm_userService _adm_userService = new adm_userService();
-        private readonly AuthenService _authenService = new AuthenService();
-        public AuthenticateController(IConfiguration configuration)
+        private readonly IAuthenService _authenService;
+        public AuthenticateController(IConfiguration configuration, IAuthenService authenService)
         {
             _configuration = configuration;
+            _authenService = authenService;
         }
 
         [HttpPost]
@@ -52,7 +53,7 @@ namespace BaseBackend.Controllers
 
         [Authorize]
         [HttpPost]
-        [Route("relogin")]
+        [Route("refresh-token")]
         public IActionResult ReLogin()
         {
             var roles = User.FindAll(ClaimTypes.Role)?.Select(c => c.Value);
@@ -168,6 +169,14 @@ namespace BaseBackend.Controllers
             return RedirectToAction("Index");
         }
 
+        [Route("GetEncryptData")]
+        [HttpPost]
+        public async Task<IActionResult> GetEncryptData(GetClientAuthenticateRequest request)
+        {
+            var encryptData = await _authenService.GenerateEncryptData(request.Url ?? "");
+
+            return Ok(encryptData);
+        }
         public static string GenerateVerificationCode()
         {
             return Guid.NewGuid().ToString().Replace("-", "").Substring(0, 6);
@@ -185,5 +194,10 @@ namespace BaseBackend.Controllers
         public string? Username { get; set; } 
         public string? Password { get; set; }
         public adm_user? adm_user { get; set; }
+    }
+
+    public class GetClientAuthenticateRequest
+    {
+        public string? Url { get; set; }
     }
 }
