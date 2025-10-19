@@ -78,7 +78,7 @@ namespace BaseBackend.Application
         /// <param name="password"></param>
         /// <param name="passwordSalt"></param>
         /// <returns></returns>
-        private static string EncryptPassword(string password, string passwordSalt)
+        public static string EncryptPassword(string password, string passwordSalt)
         {
             byte[] salt = Encoding.UTF8.GetBytes(passwordSalt);
             // Mã hóa password bằng KeyDerivation.Pbkdf2 có thêm salt và lặp 10.000 lần
@@ -86,7 +86,7 @@ namespace BaseBackend.Application
             return hashedPassword;
         }
 
-        private static string GetPasswordSalt()
+        public static string GetPasswordSalt()
         {
             return Guid.NewGuid().ToString("N");
         }

@@ -48,7 +48,7 @@ where enFeatureFunction.feature_id = @feature_id";
             return result.ToList();
         }
 
-        public List<adm_role> GetAllActiveRole()
+        public List<AdmRole> GetAllActiveRole()
         {
             string query = @"
 select role_id, code, name, description, is_active 
@@ -59,7 +59,7 @@ where deleted = 0
             using UnitOfWork unitOfWork = new UnitOfWork();
             DynamicParameters param = new DynamicParameters();
             param.Add("@active", SharedResource.Status.Active);
-            var result = unitOfWork.Connection.Query<adm_role>(query, param);
+            var result = unitOfWork.Connection.Query<AdmRole>(query, param);
             return result.ToList();
         }
         public List<adm_feature> GetAllActiveFeature()

@@ -28,14 +28,14 @@ namespace BaseBackend.Middleware
                 Int32.TryParse(userIdString, out userId);
                 var username = jwtToken.Claims.FirstOrDefault(c => c.Type == adm_user.C_username)?.Value;
                 var role = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-                UserProfile? cachedUser = ProfileCacheManager.GetUserProfile(userId);
+                UserProfile? cachedUser = UserContextManager.GetUserContext(userId);
 
                 // Nếu chưa có profile thì dựng profile
                 if (cachedUser == null)
                 {
                     adm_userService userService = new adm_userService();
-                    cachedUser = userService.GenerateUserProfile(userId);
-                    ProfileCacheManager.AddOrUpdateUser(cachedUser);
+                    cachedUser = userService.GenerateUserContext(userId);
+                    UserContextManager.AddOrUpdateUser(cachedUser);
                 }
                 // Gán profile vào UserContext để gọi ở bất cứ đâu
                 UserContext.CurrentUser = cachedUser;

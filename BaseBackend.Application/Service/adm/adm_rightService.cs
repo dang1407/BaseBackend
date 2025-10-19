@@ -32,7 +32,7 @@ namespace BaseBackend.Application.Service.adm
             List<adm_right> lstAllowedRight = _dao.GetRightByFeatureId(featureId);
 
             //02.Get AllRole active
-            List<adm_role> lstRole = _dao.GetAllActiveRole();
+            List<AdmRole> lstRole = _dao.GetAllActiveRole();
 
             foreach (var item in lstRole)
             {

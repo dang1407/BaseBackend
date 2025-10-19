@@ -28,7 +28,7 @@ where deleted = @is_not_deleted
 
             if (!string.IsNullOrWhiteSpace(filter.name))
             {
-                query += " and name like @name";
+                query += " and name ilike @name";
             }
 
             if (filter.dob_from.HasValue)
@@ -66,7 +66,7 @@ where username = @username and deleted = @is_not_deleted
             return unitOfWork.Connection.QueryFirstOrDefault<adm_user>(query, param);
         }
 
-        public List<adm_role> GetRolesOfEmployee(int? userID)
+        public List<AdmRole> GetRolesOfEmployee(int? userID)
         {
             string query = @"
 select rol.role_id, rol.code, rol.name
@@ -80,7 +80,7 @@ where rol.deleted = 0
             DynamicParameters param = new DynamicParameters();
             param.Add("@user_id", userID);
             using UnitOfWork unitOfWork = new();
-            var result = unitOfWork.Connection.Query<adm_role>(query, param);
+            var result = unitOfWork.Connection.Query<AdmRole>(query, param);
             return result.ToList();
         }
 

@@ -1,9 +1,6 @@
 ﻿using BaseBackend.Application;
-using BaseBackend.Common;
 using BaseBackend.Domain;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Text;
 
 namespace BaseBackend.Controllers.Admintrations
 {
@@ -20,6 +17,7 @@ namespace BaseBackend.Controllers.Admintrations
                 case ApiActionCode.SearchData:
                     {
                         dtoResponse.adm_users = _userService.GetPaging(requestDTO.Filter, requestDTO.PagingInfo);
+                        dtoResponse.PagingInfo = requestDTO.PagingInfo;
                         break;
                     }
                 case ApiActionCode.UpdateItem:
@@ -29,7 +27,7 @@ namespace BaseBackend.Controllers.Admintrations
                     }
                 case ApiActionCode.AddNewItem:
                     {
-                        _userService.InsertUser(requestDTO.adm_user!);
+                        dtoResponse.adm_user = _userService.InsertUser(requestDTO.adm_user!);
                         break;
                     }
                 case ApiActionCode.SetupDisplay:

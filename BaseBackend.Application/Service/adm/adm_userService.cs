@@ -24,7 +24,7 @@ namespace BaseBackend.Application
             return userRepository.GetUserByUserName(username);
         }
 
-        public void InsertUser(adm_user user)
+        public adm_user InsertUser(adm_user user)
         {
             // Validate 
             if(string.IsNullOrWhiteSpace(user.username) || string.IsNullOrWhiteSpace(user.password)) {
@@ -34,8 +34,11 @@ namespace BaseBackend.Application
             user.created_time = DateTime.Now;
             user.deleted = SharedResource.IsNotDeleteInt;
             user.version = SharedResource.FirstVersion;
+            user.password_salt = AuthenService.GetPasswordSalt();
+            user.password = AuthenService.EncryptPassword(user.password, user.password_salt);
             using UnitOfWork unitOfWork = new UnitOfWork();
             userRepository.InsertItem(user, unitOfWork);
+            return user;
         }
 
         public void UpdateUser(adm_user user) 
@@ -52,7 +55,7 @@ namespace BaseBackend.Application
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public UserProfile GenerateUserProfile(int? userId)
+        public UserProfile GenerateUserContext(int? userId)
         {
             UserProfile profile = new UserProfile();
             profile.UserId = userId;
@@ -61,7 +64,7 @@ namespace BaseBackend.Application
             profile.Username = user.username;
             profile.Email = user.email;
             profile.Phone = user.phone;
-            List<adm_role> roles = userRepository.GetRolesOfEmployee(userId);
+            List<AdmRole> roles = userRepository.GetRolesOfEmployee(userId);
             profile.RolesString = string.Join(",", roles.Select(r => r.name));
             var userRight = userRepository.GetRightsOfEmployee(userId.Value, roles.Select(r=> r.role_id.GetValueOrDefault(0)).ToList());
             profile.ListRight = userRight;

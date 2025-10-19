@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using System.Threading.RateLimiting;
 using IUnitOfWork = BaseBackend.Infrastructure.IUnitOfWork;
 
 namespace BaseBackend
@@ -39,7 +40,7 @@ namespace BaseBackend
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
+            //services.AddSwaggerGen();
 
             // Khai báo các Dependency Injection
 
@@ -146,9 +147,42 @@ namespace BaseBackend
             services.Configure<JwtConfig>(Configuration.GetSection("Jwt"));
             services.AddScoped<IClientAuthenticateRepository, ClientAuthenticateRepository>();
             services.AddScoped<IAuthenService, AuthenService>();
+            services.AddScoped<IRoleRepo, RoleRepo>();
+            services.AddScoped<IRoleService, RoleService>();
             services.AddAuthorization();
             // Cache In-Memory
             services.AddMemoryCache();
+            // Rate Limiter
+
+            services.AddRateLimiter(options =>
+            {
+                options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+                {
+                    var userId = context.User?.Claims
+                        .FirstOrDefault(c => c.Type == adm_user.C_user_id)?.Value;
+
+                    var key = userId
+                        ?? context.Connection.RemoteIpAddress?.ToString()
+                        ?? "anonymous";
+
+                    return RateLimitPartition.GetFixedWindowLimiter(
+                        partitionKey: key,
+                        factory: _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 200,
+                            Window = TimeSpan.FromMinutes(1),
+                            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                            QueueLimit = 0
+                        });
+                });
+
+                options.OnRejected = async (context, token) =>
+                {
+                    context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+                    await context.HttpContext.Response.WriteAsync("Too many requests.", token);
+                };
+            });
+
         }
 
         // Thiết lập các middleware cho ứng dụng
@@ -167,6 +201,8 @@ namespace BaseBackend
             {
                 app.UseHttpsRedirection();
             }
+            // Sử dụng Rate Limiter
+            app.UseRateLimiter();
 
             // Sử dụng routing
             app.UseRouting();

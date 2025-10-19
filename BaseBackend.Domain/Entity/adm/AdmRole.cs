@@ -1,6 +1,6 @@
 ﻿namespace BaseBackend.Domain
 {
-    public class adm_role : BaseEntity
+    public class AdmRole : BaseEntity
     {
         #region Primitive members
 
@@ -131,7 +131,7 @@
         }
 
 
-        public adm_role() : base("adm_role", "role_id", true, true) { }
+        public AdmRole() : base("adm_role", "role_id", true, true) { }
 
         #endregion
 
@@ -141,9 +141,9 @@
 
         #region Clone
 
-        public adm_role CloneToInsert()
+        public AdmRole CloneToInsert()
         {
-            adm_role newItem = new adm_role();
+            AdmRole newItem = new AdmRole();
 
             newItem.role_id = this.role_id;
             newItem.name = this.name;
@@ -163,9 +163,9 @@
             return newItem;
         }
 
-        public adm_role CloneToUpdate()
+        public AdmRole CloneToUpdate()
         {
-            adm_role newItem = new adm_role();
+            AdmRole newItem = new AdmRole();
 
             newItem.role_id = this.role_id;
             newItem.name = this.name;

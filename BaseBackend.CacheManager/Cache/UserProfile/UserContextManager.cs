@@ -3,20 +3,20 @@ using System.Collections.Concurrent;
 
 namespace BaseBackend.Application.Cache
 {
-    public static class ProfileCacheManager
+    public static class UserContextManager
     {
         private static readonly ConcurrentDictionary<int, (UserProfile User, DateTime LastAccessed)> _userCache = new();
         private static readonly TimeSpan _cacheExpiration = TimeSpan.FromHours(2);
         private static Timer _cleanupTimer;
 
-        static ProfileCacheManager()
+        static UserContextManager()
         {
             // Dọn dẹp cache mỗi giờ
             _cleanupTimer = new Timer(_ => CleanupExpiredItems(), null,
                 TimeSpan.FromHours(1), TimeSpan.FromHours(1));
         }
 
-        public static UserProfile? GetUserProfile(int? id)
+        public static UserProfile? GetUserContext(int? id)
         {
             if (id == null) return null;
 
