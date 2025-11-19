@@ -7,7 +7,15 @@ namespace BaseBackend.Infrastructure
 {
     public class BaseRepository
     {
-
+        #region Truy vấn phân trang 
+        public async Task<List<TEntity>> GetPagingAsync<TEntity>(string query, DynamicParameters param, PagingInfo pagingInfo)
+        {
+            query += $" \n LIMIT {pagingInfo.PageSize} OFFSET {pagingInfo.PageIndex * pagingInfo.PageSize}";
+            using UnitOfWork unitOfWork = new UnitOfWork();
+            var result = await unitOfWork.Connection.QueryAsync<TEntity>(query, param);
+            return [.. result];
+        }
+        #endregion
         public (string query, DynamicParameters param, PropertyInfo? idProperty) GetDataForInsert<TEntity>(BaseEntity entity) where TEntity : BaseEntity
         {
             var tableName = entity.GetTableName();
@@ -92,6 +100,10 @@ namespace BaseBackend.Infrastructure
             List<string> listUpdateState = [];
             entity.GetListChangeColumn().ForEach(changeColName =>
             {
+                if (string.Compare(changeColName, "version", StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    return;
+                }
                 listUpdateState.Add($"{changeColName} = @{changeColName}");
             });
             if (listUpdateState.Count > 0 && entity.GetHasVersion())
@@ -101,23 +113,38 @@ namespace BaseBackend.Infrastructure
             string updateState = string.Join(", ", listUpdateState);
             string query = $"update {tableName} set {updateState} where {entity.GetPrimaryKeyColumnName()} = @{entity.GetPrimaryKeyColumnName()}";
 
+            if (entity.GetHasVersion() == true)
+            {
+                query += " and version = @version returning version";
+            }
+
             var param = new DynamicParameters();
             foreach (var property in _propertyInfo)
             {
                 param.Add($"@{property.Name}", property.GetValue(entity));
             }
+            int affectedRows = 0;
+            int version = -1;
             if (unitOfWork != null)
             {
-                int affectedRows = await unitOfWork.Connection.ExecuteAsync(query, param, transaction: unitOfWork.Transaction);
-                return affectedRows;
+                version = await unitOfWork.Connection.ExecuteScalarAsync<int>(query, param, transaction: unitOfWork.Transaction);
             }
             else
             {
                 using UnitOfWork localUnitOfWork = new UnitOfWork();
-                int affectedRows = await localUnitOfWork.Connection.ExecuteAsync(query, param, transaction: localUnitOfWork.Transaction);
-                return affectedRows;
+                version = await localUnitOfWork.Connection.ExecuteScalarAsync<int>(query, param, transaction: localUnitOfWork.Transaction);
             }
+            affectedRows = version > 0 ? 1 : 0;
 
+            if (entity.GetHasVersion() == true)
+            {
+                var propertyVersion = _propertyInfo.Where(props => string.Compare(props.Name, "version", StringComparison.OrdinalIgnoreCase) == 0).FirstOrDefault();
+                if (propertyVersion != null)
+                {
+                    propertyVersion.SetValue(entity, version);
+                }
+            }
+            return affectedRows;
         }
 
         public int UpdateItem<TEntity>(TEntity entity, IUnitOfWork unitOf) where TEntity : BaseEntity
