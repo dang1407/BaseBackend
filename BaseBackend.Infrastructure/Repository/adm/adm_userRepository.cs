@@ -16,9 +16,25 @@ namespace BaseBackend.Infrastructure
         public List<adm_user> GetPaging(adm_userFilter? filter, PagingInfo pagingInfo)
         {
             string query = @"
-select
-*
-from adm_user 
+select 
+au.user_id,
+au.name,
+au.username, 
+au.code,
+au.version,
+au.dob,
+au.gender,
+au.email,
+au.authencation_type,
+au.created_by,
+au.created_time,
+au.updated_by,
+au.updated_time,
+au.notes,
+au.number_of_fail,
+au.phone,
+au.status
+from adm_user au
 where deleted = @is_not_deleted
 ";
             if (!string.IsNullOrWhiteSpace(filter.username))
@@ -48,7 +64,10 @@ where deleted = @is_not_deleted
             using UnitOfWork unitOfWork = new UnitOfWork();
             var result = unitOfWork.Connection.Query<adm_user>(query, param).ToList();
             // Loại bỏ các trường thông tin nhạy cảm 
-            result.ForEach(user => user.password = null);
+            result.ForEach(user => {
+                user.password = null;
+                user.password_salt = null;
+            });
             return result;
         }
 
