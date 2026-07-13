@@ -20,27 +20,27 @@ namespace BaseBackend.Controllers.Admintrations
             {
                 case ApiActionCode.SearchData:
                     {
-                        dtoResponse.AdmRoles = await _roleService.GetPaging(requestDTO.Filter, requestDTO.PagingInfo);
+                        dtoResponse.AdmRoles = await _roleService.GetPagingAsync(requestDTO.Filter, requestDTO.PagingInfo);
                         dtoResponse.PagingInfo = requestDTO.PagingInfo;
                         break;
                     }
                 case ApiActionCode.UpdateItem:
                     {
                         AdmRole role = requestDTO.AdmRole?.CloneToUpdate() ?? throw new InvalidInputException(SharedResource.InputDataInvalid);
-                        await _roleService.UpdateItem(role);
+                        await _roleService.UpdateItemAsync(role);
                         break;
                     }
                 case ApiActionCode.AddNewItem:
                     {
                         AdmRole role = requestDTO.AdmRole ?? throw new InvalidInputException(SharedResource.InputDataInvalid);
-                        dtoResponse.AdmRole = await _roleService.InsertItem(role);
+                        dtoResponse.AdmRole = await _roleService.InsertItemAsync(role);
                         break;
                     }
                 case ApiActionCode.SetupDisplay:
                     {
                         if (requestDTO.RoleId.HasValue)
                         {
-                            dtoResponse.AdmRole = await _roleService.GetById(requestDTO.RoleId.Value);
+                            dtoResponse.AdmRole = await _roleService.GetByIdAsync(requestDTO.RoleId.Value);
                         }
                         break;
                     }
@@ -48,7 +48,7 @@ namespace BaseBackend.Controllers.Admintrations
                     {
                         if (requestDTO.RoleId.HasValue)
                         {
-                            dtoResponse.AdmRole = await _roleService.GetById(requestDTO.RoleId.Value);
+                            dtoResponse.AdmRole = await _roleService.GetByIdAsync(requestDTO.RoleId.Value);
                         }
                         break;
                     }

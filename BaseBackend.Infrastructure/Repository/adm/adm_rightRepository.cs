@@ -6,7 +6,7 @@ namespace BaseBackend.Infrastructure.Repository.adm
 {
     public class adm_rightRepository : BaseRepository
     {
-        public List<adm_right> GetRightByFeatureIdAsync(int featureID)
+        public List<AdmRight> GetRightByFeatureIdAsync(int featureID)
         {
             string query = @"
 select * 
@@ -15,7 +15,7 @@ where feature_id = @feature_id";
             using UnitOfWork unitOfWork = new UnitOfWork();
             DynamicParameters param = new DynamicParameters();
             param.Add("@feature_id", featureID);
-            var result = unitOfWork.Connection.Query<adm_right>(query, param);
+            var result = unitOfWork.Connection.Query<AdmRight>(query, param);
             return result.ToList();
         }
 
@@ -58,7 +58,7 @@ where deleted = 0
 ";
             using UnitOfWork unitOfWork = new UnitOfWork();
             DynamicParameters param = new DynamicParameters();
-            param.Add("@active", SharedResource.Status.Active);
+            param.Add("@active", true);
             var result = unitOfWork.Connection.Query<AdmRole>(query, param);
             return result.ToList();
         }
@@ -71,18 +71,15 @@ where deleted = 0
     and active = @active
     and feature_id != @globalconfig";
 
-            DynamicParameters sqlCmd = new DynamicParameters();
-            sqlCmd.Add("@active", SharedResource.Status.Active);
-            sqlCmd.Add("@globalconfig", SharedResource.GlobalConfig);
-
             using UnitOfWork unitOfWork = new UnitOfWork();
             DynamicParameters param = new DynamicParameters();
             param.Add("@active", SharedResource.Status.Active);
+            param.Add("@globalconfig", SharedResource.GlobalConfig);
             var result = unitOfWork.Connection.Query<adm_feature>(query, param);
             return result.ToList();
         }
 
-        public List<adm_right> GetRightByFeatureId(int featureID)
+        public List<AdmRight> GetRightByFeatureId(int featureID)
         {
             string query = @"
 select * 
@@ -91,7 +88,7 @@ where feature_id = @feature_id";
             using UnitOfWork unitOfWork = new UnitOfWork();
             DynamicParameters param = new DynamicParameters();
             param.Add("@feature_id", featureID);
-            var result = unitOfWork.Connection.Query<adm_right>(query, param);
+            var result = unitOfWork.Connection.Query<AdmRight>(query, param);
             return result.ToList();
         }
 

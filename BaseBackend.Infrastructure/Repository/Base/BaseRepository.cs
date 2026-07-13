@@ -54,7 +54,7 @@ namespace BaseBackend.Infrastructure
             }
             return (query, param, idProperty);
         }
-        public async Task<BaseEntity> InsertItemAsync<TEntity>(BaseEntity entity, IUnitOfWork? unitOfWork) where TEntity : BaseEntity
+        public async Task<TEntity> InsertItemAsync<TEntity>(TEntity entity, IUnitOfWork? unitOfWork) where TEntity : BaseEntity
         {
             var data = GetDataForInsert<TEntity>(entity);
             int id;
@@ -72,7 +72,7 @@ namespace BaseBackend.Infrastructure
             return entity;
         }
 
-        public BaseEntity InsertItem<TEntity>(TEntity entity, IUnitOfWork unitOfWork) where TEntity : BaseEntity
+        public TEntity InsertItem<TEntity>(TEntity entity, IUnitOfWork unitOfWork) where TEntity : BaseEntity
         {
             var data = GetDataForInsert<TEntity>(entity);
             int id;
@@ -212,7 +212,7 @@ namespace BaseBackend.Infrastructure
             return affectedRows;
         }
 
-        public async Task<int> DeleteItemByColumnName<TEntity>(BaseEntity entity, string colName, string colValue, IUnitOfWork? unitOfWork = null) where TEntity : BaseEntity
+        public async Task<int> DeleteItemByColumnNameAsync<TEntity>(BaseEntity entity, string colName, string colValue, IUnitOfWork? unitOfWork = null) where TEntity : BaseEntity
         {
             var tableName = entity.GetTableName();
             string query = "";

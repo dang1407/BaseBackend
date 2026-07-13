@@ -29,7 +29,7 @@ namespace BaseBackend.Application.Service.adm
             }
 
             List<BuildRightConfig> lstRightConfig = new List<BuildRightConfig>();
-            List<adm_right> lstAllowedRight = _dao.GetRightByFeatureId(featureId);
+            List<AdmRight> lstAllowedRight = _dao.GetRightByFeatureId(featureId);
 
             //02.Get AllRole active
             List<AdmRole> lstRole = _dao.GetAllActiveRole();
@@ -49,14 +49,14 @@ namespace BaseBackend.Application.Service.adm
         public void SaveItem(int featureId, List<BuildRightConfig> buildRightConfigs)
         {
             //Prepare Data
-            List<adm_right> lstRight = new List<adm_right>();
+            List<AdmRight> lstRight = new List<AdmRight>();
             foreach (var item in buildRightConfigs)
             {
                 if (item.FunctionIds != null)
                 {
                     foreach (int? functionID in item.FunctionIds)
                     {
-                        adm_right right = new adm_right();
+                        AdmRight right = new AdmRight();
                         right.role_id = item.ItemId;
                         right.function_id = functionID;
                         right.feature_id = featureId;

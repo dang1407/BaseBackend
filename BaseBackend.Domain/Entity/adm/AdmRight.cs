@@ -1,6 +1,6 @@
 ﻿namespace BaseBackend.Domain
 {
-    public class adm_right : BaseEntity
+    public class AdmRight : BaseEntity
     {
         #region Primitive members
 
@@ -48,7 +48,7 @@
             get { return _user_id; }
             set { _user_id = value; NotifyPropertyChanged(C_user_id); }
         }
-        public adm_right() : base("adm_right", "right_id", false, false) { }
+        public AdmRight() : base("adm_right", "right_id", false, false) { }
 
         #endregion
 
@@ -58,9 +58,9 @@
 
         #region Clone
 
-        public adm_right CloneToInsert()
+        public AdmRight CloneToInsert()
         {
-            adm_right newItem = new adm_right();
+            AdmRight newItem = new AdmRight();
 
             newItem.right_id = this.right_id;
             newItem.role_id = this.role_id;
@@ -70,9 +70,9 @@
             return newItem;
         }
 
-        public adm_right CloneToUpdate()
+        public AdmRight CloneToUpdate()
         {
-            adm_right newItem = new adm_right();
+            AdmRight newItem = new AdmRight();
 
             newItem.right_id = this.right_id;
             newItem.role_id = this.role_id;

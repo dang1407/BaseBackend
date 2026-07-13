@@ -12,7 +12,9 @@
             "/swagger/v1/swagger.json",
             "/swagger/swagger-ui.css",
             "/swagger/swagger-ui-bundle.js",
-            "/swagger/swagger-ui-standalone-preset.js"
+            "/swagger/swagger-ui-standalone-preset.js",
+            "/api/Index/formcollection",
+            "/api/Index/formcollectionform"
         };
     }
 }

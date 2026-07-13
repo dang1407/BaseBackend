@@ -53,7 +53,10 @@ namespace BaseBackend.Application
                 Expires = DateTime.UtcNow.AddMinutes(Int32.Parse(jwtConfig.TokenValidityInMinutes)),
                 Issuer = jwtConfig.Issuer,
                 Audience = jwtConfig.Audience,
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),SecurityAlgorithms.HmacSha512Signature)
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha512Signature // Phải khớp với check trong middleware
+                )
             };
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenDescriptor);

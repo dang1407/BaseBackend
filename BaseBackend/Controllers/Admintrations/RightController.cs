@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BaseBackend.Controllers.Admintrations
 {
-    [Route("api/web/manage/internal/Right")]
     public class RightController : BaseController
     {
         [HttpPost]

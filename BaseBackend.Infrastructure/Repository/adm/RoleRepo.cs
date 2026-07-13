@@ -5,17 +5,18 @@ namespace BaseBackend.Infrastructure
 {
     public class RoleRepo : BaseRepository, IRoleRepo
     {
-        public async Task<int> DeleteItem(int id, IUnitOfWork? unitOfWork)
+        public async Task<int> DeleteItemAsync(int id, IUnitOfWork? unitOfWork)
         {
             return await base.DeleteItemByIdAsync<AdmRole>(id);
         }
 
-        public async Task<AdmRole?> GetById(int id)
+
+        public async Task<AdmRole?> GetByIdAsync(int id)
         {
             return await base.FindByIdAsync<AdmRole>(id);
         }
 
-        public async Task<List<AdmRole>> GetPaging(AdmRoleFilter filter, PagingInfo pagingInfo)
+        public async Task<List<AdmRole>> GetPagingAsync(AdmRoleFilter? filter, PagingInfo? pagingInfo)
         {
             string query = @"
 select * from adm_role role
@@ -43,14 +44,19 @@ where role.deleted = @is_not_deleted
             return result.ToList();
         }
 
-        public async Task<AdmRole> InsertItem(AdmRole role, IUnitOfWork? unitOfWork)
+        public async Task<AdmRole> InsertItemAsync(AdmRole role, IUnitOfWork? unitOfWork)
         {
             return (AdmRole)await base.InsertItemAsync<AdmRole>(role, unitOfWork);
         }
 
-        public Task<int> UpdateItem(AdmRole role, IUnitOfWork? unitOfWork)
+        public Task<int> UpdateItemAsync(AdmRole role, IUnitOfWork? unitOfWork)
         {
             return base.UpdateItemAsync<AdmRole>(role, unitOfWork);
         }
+        public Task<int> DeleteItemAsync(AdmRole item, IUnitOfWork? unitOfWork = null)
+        {
+            return base.DeleteItemByIdAsync<AdmRole>(item.role_id.Value);
+        }
+
     }
 }

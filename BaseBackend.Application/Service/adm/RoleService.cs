@@ -12,39 +12,41 @@ namespace BaseBackend.Application
             _roleRepo = roleRepo;
         }
 
-        public async Task<int> DeleteItem(int id, IUnitOfWork? unitOfWork = null)
+        public async Task<int> DeleteItemAsync(int id, IUnitOfWork? unitOfWork = null)
         {
-            return await _roleRepo.DeleteItem(id, unitOfWork);
+            AdmRole? item = await GetByIdAsync(id);
+            if (item == null) throw new NotFoundException();
+            return await _roleRepo.DeleteItemAsync(item, unitOfWork);
         }
 
-        public async Task<AdmRole?> GetById(int id)
+        public async Task<AdmRole?> GetByIdAsync(int id)
         {
-            return await _roleRepo.GetById(id);
+            return await _roleRepo.GetByIdAsync(id);
         }
 
-        public async Task<List<AdmRole>> GetPaging(AdmRoleFilter? filter, PagingInfo? pagingInfo)
+        public async Task<List<AdmRole>> GetPagingAsync(AdmRoleFilter? filter, PagingInfo? pagingInfo)
         {
             if(filter == null)
                 filter = new AdmRoleFilter();
             if(pagingInfo == null)
                 pagingInfo = new PagingInfo();
-            return await _roleRepo.GetPaging(filter, pagingInfo);
+            return await _roleRepo.GetPagingAsync(filter, pagingInfo);
         }
 
-        public Task<AdmRole> InsertItem(AdmRole item, IUnitOfWork? unitOfWork = null)
+        public Task<AdmRole> InsertItemAsync(AdmRole item, IUnitOfWork? unitOfWork = null)
         {
             item.version = SharedResource.FirstVersion;
             item.deleted = SharedResource.IsNotDeleteInt;
             item.created_by = UserContext.CurrentUser.UserId;
             item.created_time = DateTime.Now;
-            return _roleRepo.InsertItem(item, unitOfWork);
+            return _roleRepo.InsertItemAsync(item, unitOfWork);
         }
 
-        public Task<int> UpdateItem(AdmRole item, IUnitOfWork? unitOfWork = null)
+        public Task<int> UpdateItemAsync(AdmRole item, IUnitOfWork? unitOfWork = null)
         {
             item.updated_by = UserContext.CurrentUser.UserId;
             item.updated_time = DateTime.Now;
-            return _roleRepo.UpdateItem(item, unitOfWork);
+            return _roleRepo.UpdateItemAsync(item, unitOfWork);
         }
     }
 }

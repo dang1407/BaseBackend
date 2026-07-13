@@ -31,7 +31,7 @@ namespace BaseBackend.Middleware
                 UserProfile? cachedUser = UserContextManager.GetUserContext(userId);
 
                 // Nếu chưa có profile thì dựng profile
-                if (cachedUser == null)
+                if (cachedUser == null && userId > 0)
                 {
                     adm_userService userService = new adm_userService();
                     cachedUser = userService.GenerateUserContext(userId);

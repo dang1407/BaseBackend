@@ -1,9 +1,11 @@
 using BaseBackend.Application;
 using BaseBackend.Domain;
 using BaseBackend.Infrastructure;
+using BaseBackend.Infrastructure.Repository;
 using BaseBackend.Middleware;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -149,6 +151,13 @@ namespace BaseBackend
             services.AddScoped<IAuthenService, AuthenService>();
             services.AddScoped<IRoleRepo, RoleRepo>();
             services.AddScoped<IRoleService, RoleService>();
+            // Booking System
+            services.AddScoped<ICarTripRepository, CarTripRepository>();
+            services.AddScoped<ICarTripService, RouteService>();
+            services.AddScoped<IBookingRepository, BookingRepository>();
+            services.AddScoped<IBookingService, BookingService>();
+            services.AddScoped<ICarRouteService, CarRouteService>();
+            services.AddScoped<ICarRouteRepository, CarRouteRepository>();
             services.AddAuthorization();
             // Cache In-Memory
             services.AddMemoryCache();
@@ -182,7 +191,10 @@ namespace BaseBackend
                     await context.HttpContext.Response.WriteAsync("Too many requests.", token);
                 };
             });
-
+            services.Configure<FormOptions>(options =>
+             {
+                 options.MultipartBodyLengthLimit = long.MaxValue;
+             });
         }
 
         // Thiết lập các middleware cho ứng dụng
@@ -216,7 +228,7 @@ namespace BaseBackend
 
             app.UseMiddleware<ExceptionMiddleware>();
             app.UseMiddleware<JwtMiddleware>();
-            app.UseMiddleware<DecryptionMiddleware>();
+            //app.UseMiddleware<DecryptionMiddleware>();
             // Thiết lập endpoint cho API
             app.UseEndpoints(endpoints =>
             {
