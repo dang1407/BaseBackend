@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 using System.Text;
 using System.Threading.RateLimiting;
 using IUnitOfWork = BaseBackend.Infrastructure.IUnitOfWork;
@@ -151,6 +152,8 @@ namespace BaseBackend
             services.AddScoped<IAuthenService, AuthenService>();
             services.AddScoped<IRoleRepo, RoleRepo>();
             services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<INovelRepo, NovelRepo>();
+            services.AddScoped<ICommentRepo, CommentRepo>();
             // Booking System
             services.AddScoped<ICarTripRepository, CarTripRepository>();
             services.AddScoped<ICarTripService, RouteService>();
@@ -158,6 +161,7 @@ namespace BaseBackend
             services.AddScoped<IBookingService, BookingService>();
             services.AddScoped<ICarRouteService, CarRouteService>();
             services.AddScoped<ICarRouteRepository, CarRouteRepository>();
+            services.AddScoped<INovelService, NovelService>();
             services.AddAuthorization();
             // Cache In-Memory
             services.AddMemoryCache();
@@ -195,18 +199,18 @@ namespace BaseBackend
              {
                  options.MultipartBodyLengthLimit = long.MaxValue;
              });
+
+            // 1. Lấy connection string từ appsettings.json
+            var redisConnectionString = Configuration.GetConnectionString("Redis");
+
+            // 2. Đăng ký ConnectionMultiplexer dưới dạng Singleton
+            services.AddSingleton<IConnectionMultiplexer>(sp =>
+                ConnectionMultiplexer.Connect(redisConnectionString));
         }
 
         // Thiết lập các middleware cho ứng dụng
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
 
             // ở môi trường dev thì không sử dụng HTTPS
             if (!env.IsDevelopment())
@@ -228,7 +232,7 @@ namespace BaseBackend
 
             app.UseMiddleware<ExceptionMiddleware>();
             app.UseMiddleware<JwtMiddleware>();
-            //app.UseMiddleware<DecryptionMiddleware>();
+            app.UseMiddleware<DecryptionMiddleware>();
             // Thiết lập endpoint cho API
             app.UseEndpoints(endpoints =>
             {

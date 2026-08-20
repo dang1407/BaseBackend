@@ -19,7 +19,7 @@ namespace BaseBackend.Controllers
             {
                 ipAddress = clientIP.ToString();
             }
-            return Ok(ipAddress);
+            return Ok($"Api is running {DateTime.Now.ToString("HH:mm dd/mm/yyyy")}");
         }
         [HttpGet]
         [Route("config")]

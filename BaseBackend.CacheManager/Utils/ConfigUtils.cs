@@ -108,6 +108,16 @@ namespace BaseBackend.Application
                 return _JwtSessionTimeout.Value;
             }
         }
+
+        public static bool IsEncryptRequest
+        {
+            get
+            {
+                string? config = GetConfig("IsEncryptRequest");
+
+                return string.Compare(config, "true",StringComparison.OrdinalIgnoreCase) == 0;
+            }
+        }
     }
 
     public class LoggingConfig

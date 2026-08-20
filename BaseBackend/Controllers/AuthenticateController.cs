@@ -26,19 +26,20 @@ namespace BaseBackend.Controllers
 
         [HttpPost]
         [Route("login")]
-        public  ActionResult LoginAsync([FromBody] AccountDTO loginDTO)
+        public ActionResult LoginAsync([FromBody] AccountDTO loginDTO)
         {
-            string token = _authenService.Login(loginDTO.Username, loginDTO.Password);
+            var result = _authenService.Login(loginDTO.Username, loginDTO.Password);
             var cookieOptions = new CookieOptions
             {
                 Expires = DateTime.UtcNow.AddMinutes(Int32.Parse(ConfigUtils.JwtConfiguration.TokenValidityInMinutes)),
             };
 
             string systemName = ConfigUtils.JwtConfiguration.AccessTokenKey;
-            Response.Cookies.Append(systemName, token, cookieOptions);
+            Response.Cookies.Append(systemName, result.accessToken, cookieOptions);
             return Ok(new
             {
-                AccessToken = token,
+                AccessToken = result.accessToken,
+                User = result.user
             });
         }
 
@@ -46,7 +47,7 @@ namespace BaseBackend.Controllers
         [Route("sign-up")]
         public ActionResult SignUp([FromBody] AccountDTO loginDTO)
         {
-            if (loginDTO.adm_user == null) throw new ExecuteErrorException(SharedResource.InputDataInvalid); 
+            if (loginDTO.adm_user == null) throw new ExecuteErrorException(SharedResource.InputDataInvalid);
             _authenService.SignUp(loginDTO.adm_user);
             return Ok();
         }
@@ -61,52 +62,52 @@ namespace BaseBackend.Controllers
             return Ok(roles);
         }
 
-//        [HttpPost]
-//        [Route("refresh-token/{companyId}")]
-//        public async Task<IActionResult> RefreshToken(TokenModel tokenModel, Guid companyId)
-//        {
-//            if (tokenModel is null)
-//            {
-//                return BadRequest("Invalid client request");
-//            }
+        //        [HttpPost]
+        //        [Route("refresh-token/{companyId}")]
+        //        public async Task<IActionResult> RefreshToken(TokenModel tokenModel, Guid companyId)
+        //        {
+        //            if (tokenModel is null)
+        //            {
+        //                return BadRequest("Invalid client request");
+        //            }
 
-//            string? accessToken = tokenModel.AccessToken;
-//            string? refreshToken = tokenModel.RefreshToken;
+        //            string? accessToken = tokenModel.AccessToken;
+        //            string? refreshToken = tokenModel.RefreshToken;
 
-//            var principal = GetPrincipalFromExpiredToken(accessToken);
-//            if (principal == null)
-//            {
-//                return BadRequest("Invalid access token or refresh token");
-//            }
+        //            var principal = GetPrincipalFromExpiredToken(accessToken);
+        //            if (principal == null)
+        //            {
+        //                return BadRequest("Invalid access token or refresh token");
+        //            }
 
-//#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-//#pragma warning disable CS8602 // Dereference of a possibly null reference.
-//            string Username = principal.Identity.Name;
-//#pragma warning restore CS8602 // Dereference of a possibly null reference.
-//#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
-//            var loginDTO = new AccountDTO()
-//            {
-//                Username = Username ?? "Unknow user"
-//            };
-//            var user = await _userService.FindAccountAsync(loginDTO);
+        //#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+        //#pragma warning disable CS8602 // Dereference of a possibly null reference.
+        //            string Username = principal.Identity.Name;
+        //#pragma warning restore CS8602 // Dereference of a possibly null reference.
+        //#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+        //            var loginDTO = new AccountDTO()
+        //            {
+        //                Username = Username ?? "Unknow user"
+        //            };
+        //            var user = await _userService.FindAccountAsync(loginDTO);
 
-//            if (user == null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.Now)
-//            {
-//                return BadRequest("Invalid access token or refresh token");
-//            }
+        //            if (user == null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.Now)
+        //            {
+        //                return BadRequest("Invalid access token or refresh token");
+        //            }
 
-//            var newAccessToken = CreateToken(principal.Claims.ToList());
-//            var newRefreshToken = GenerateRefreshToken();
+        //            var newAccessToken = CreateToken(principal.Claims.ToList());
+        //            var newRefreshToken = GenerateRefreshToken();
 
-//            user.RefreshToken = newRefreshToken;
-//            //await _userManager.UpdateAsync(user);
+        //            user.RefreshToken = newRefreshToken;
+        //            //await _userManager.UpdateAsync(user);
 
-//            return new ObjectResult(new
-//            {
-//                accessToken = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
-//                refreshToken = newRefreshToken
-//            });
-//        }
+        //            return new ObjectResult(new
+        //            {
+        //                accessToken = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
+        //                refreshToken = newRefreshToken
+        //            });
+        //        }
 
         [HttpGet]
         [Route("new-access-token")]
@@ -173,9 +174,16 @@ namespace BaseBackend.Controllers
         [HttpPost]
         public async Task<IActionResult> GetEncryptData(GetClientAuthenticateRequest request)
         {
-            var encryptData = await _authenService.GenerateEncryptData(request.Url ?? "");
+            if (ConfigUtils.IsEncryptRequest)
+            {
+                var encryptData = await _authenService.GenerateEncryptData(request.Url ?? "");
 
-            return Ok(encryptData);
+                return Ok(encryptData);
+            }
+            else
+            {
+                return Ok(new { });
+            }
         }
         public static string GenerateVerificationCode()
         {
@@ -191,7 +199,7 @@ namespace BaseBackend.Controllers
 
     public class AccountDTO
     {
-        public string? Username { get; set; } 
+        public string? Username { get; set; }
         public string? Password { get; set; }
         public adm_user? adm_user { get; set; }
     }

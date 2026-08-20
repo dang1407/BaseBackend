@@ -1,4 +1,5 @@
-﻿using BaseBackend.Application.Service.Securities;
+﻿using BaseBackend.Application;
+using BaseBackend.Application.Service.Securities;
 using BaseBackend.Common;
 using BaseBackend.Domain;
 using BaseBackend.Domain.Entity.adm;
@@ -19,7 +20,7 @@ namespace BaseBackend.Middleware
 
         public async Task InvokeAsync(HttpContext context, IClientAuthenticateRepository clientAuthenticateRepository)
         {
-            if (context.Request.Method == "GET" || SafeAPI.WhiteList.Contains(context.Request.Path))
+            if (context.Request.Method == "GET" || SafeAPI.WhiteList.Contains(context.Request.Path) || !ConfigUtils.IsEncryptRequest)
             {
                 await _next(context);
                 return;

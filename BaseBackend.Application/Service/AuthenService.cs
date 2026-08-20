@@ -12,6 +12,12 @@ using static BaseBackend.Application.Service.Securities.EncryptionService;
 
 namespace BaseBackend.Application
 {
+    public interface IAuthenService
+    {
+        Task<AdmClientAuthenticate> GenerateEncryptData(string path);
+        (string accessToken, adm_user user) Login(string? username, string? password);
+        void SignUp(adm_user user);
+    }
     public class AuthenService: IAuthenService
     {
         private IClientAuthenticateRepository _clientAuthenticateRepository;
@@ -20,7 +26,7 @@ namespace BaseBackend.Application
             _clientAuthenticateRepository = clientAuthenticateRepository;
         }
         private readonly adm_userService _userService = new adm_userService();
-        public string Login(string? userName, string? password)
+        public (string accessToken, adm_user user) Login(string? userName, string? password)
         {
             if(string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
             {
@@ -61,7 +67,11 @@ namespace BaseBackend.Application
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var stringToken = tokenHandler.WriteToken(token);
-            return stringToken;
+
+            // bỏ thông tin nhạy cảm 
+            user.password = null;
+            user.password_salt = null;
+            return (stringToken, user);
         }
 
         public void SignUp(adm_user user)
