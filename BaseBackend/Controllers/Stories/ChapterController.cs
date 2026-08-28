@@ -1,4 +1,4 @@
-﻿using BaseBackend.Application;
+using BaseBackend.Application;
 using BaseBackend.Domain;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,6 +33,14 @@ namespace BaseBackend.Controllers.Stories
                 case "GetChapterByID":
                     {
                         response.Chapter = await _ChapterService.GetItemByIDAsync<Chapter>(request.ChapterID);
+                        break;
+                    }
+                case "IncreaseViewCount":
+                    {
+                        if (request.ChapterID.HasValue)
+                        {
+                            await _ChapterService.IncreaseViewCountAsync(request.ChapterID.Value);
+                        }
                         break;
                     }
                 default:
